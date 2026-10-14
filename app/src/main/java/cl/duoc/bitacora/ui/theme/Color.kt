@@ -2,9 +2,15 @@ package cl.duoc.bitacora.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val AzulPrimario = Color(0xFF1E5BA8)
-val AzulClaro = Color(0xFFD6E4FF)
-val VerdeAcento = Color(0xFF2E7D32)
+// Paleta alegre: azul vivo, naranja cálido y verde
+val AzulPrimario = Color(0xFF2979FF)
+val AzulClaro = Color(0xFFDCE8FF)
+val AzulOscuro = Color(0xFF0B2A66)
+val NaranjaAcento = Color(0xFFFF8F00)
+val NaranjaClaro = Color(0xFFFFE0B2)
+val NaranjaOscuro = Color(0xFF3E2700)
+val VerdeAcento = Color(0xFF43A047)
+val FondoSuave = Color(0xFFF7F9FF)
 
 // Colores para identificar estados (el caso pide diferenciarlos visualmente)
 val ColorBorrador = Color(0xFFE0E0E0)    // gris: borrador
