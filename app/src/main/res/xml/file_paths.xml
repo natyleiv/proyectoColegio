@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- files-path: carpeta "evidencias" dentro del almacenamiento privado permanente de la app.
+         (En clase se usó cache-path; aquí usamos files-path porque las evidencias
+         deben conservarse y Android no las borra como la caché). -->
+    <files-path
+        name="evidencias"
+        path="evidencias/" />
+</paths>
