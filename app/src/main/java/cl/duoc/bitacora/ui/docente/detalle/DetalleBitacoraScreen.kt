@@ -39,6 +39,11 @@ import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.nombreMes
 import androidx.compose.animation.Crossfade
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Lock
+import cl.duoc.bitacora.ui.componentes.EstadoVacio
+import cl.duoc.bitacora.ui.componentes.TituloSeccion
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,18 +72,27 @@ fun DetalleBitacoraScreen(
         snackbarHostState = snackbarHostState,
         onVolver = onVolver
     ) { innerPadding ->
-        val bitacoraActual = bitacora
+        val resultado = bitacora
 
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (bitacoraActual == null) {
+            if (resultado == null) {
+                // Room todavía no responde
+                item { Text("Cargando...") }
+            } else if (resultado.isEmpty()) {
                 // No existe o no pertenece a este docente
-                item { Text("No tienes acceso a esta bitácora.") }
+                item {
+                    EstadoVacio(
+                        texto = "No tienes acceso a esta bitácora.",
+                        icono = Icons.Filled.Lock
+                    )
+                }
             } else {
+                val bitacoraActual = resultado.first()
                 // ---- Datos de la bitácora ----
                 item {
                     Card(modifier = Modifier.fillMaxWidth()) {
@@ -142,9 +156,9 @@ fun DetalleBitacoraScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Text(
-                                text = "Indicadores de participación",
-                                style = MaterialTheme.typography.titleMedium
+                            TituloSeccion(
+                                texto = "Indicadores de participación",
+                                icono = Icons.Filled.BarChart
                             )
                             Text("Participaron ${uiState.participaron} de ${uiState.totalEstudiantes} estudiantes")
                             LinearProgressIndicator(
@@ -168,9 +182,9 @@ fun DetalleBitacoraScreen(
 
                 // ---- Filtros ----
                 item {
-                    Text(
-                        text = "Aportes recibidos",
-                        style = MaterialTheme.typography.titleMedium
+                    TituloSeccion(
+                        texto = "Aportes recibidos",
+                        icono = Icons.Filled.Inbox
                     )
                 }
                 item {

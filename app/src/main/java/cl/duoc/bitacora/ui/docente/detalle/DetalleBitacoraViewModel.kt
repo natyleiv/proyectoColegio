@@ -31,8 +31,8 @@ class DetalleBitacoraViewModel(
     private val bitacoraId = Sesion.bitacoraId
     private val docenteId = Sesion.usuario?.id ?: 0
 
-    // Si la bitácora no es de este docente, la consulta devuelve null (sin acceso)
-    val bitacora: StateFlow<Bitacora?> =
+    // null = todavía cargando · lista vacía = sin acceso · lista con 1 = la bitácora
+    val bitacora: StateFlow<List<Bitacora>?> =
         bitacoraRepository
             .obtenerParaDocente(bitacoraId, docenteId)
             .stateIn(

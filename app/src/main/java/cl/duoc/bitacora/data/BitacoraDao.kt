@@ -16,8 +16,9 @@ interface BitacoraDao {
     @Query("SELECT * FROM bitacoras WHERE docenteId = :docenteId ORDER BY anio DESC, mes DESC, id DESC")
     fun obtenerPorDocente(docenteId: Int): Flow<List<Bitacora>>
 
+    // Devuelve una lista: vacía si la bitácora no existe o no es de este docente
     @Query("SELECT * FROM bitacoras WHERE id = :id AND docenteId = :docenteId")
-    fun obtenerParaDocente(id: Int, docenteId: Int): Flow<Bitacora?>
+    fun obtenerParaDocente(id: Int, docenteId: Int): Flow<List<Bitacora>>
 
     // Solo las bitácoras publicadas del curso del estudiante
     @Query("SELECT * FROM bitacoras WHERE curso = :curso AND estado = 'PUBLICADA' ORDER BY anio DESC, mes DESC, id DESC")

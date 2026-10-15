@@ -21,7 +21,7 @@ class BitacoraRepository(private val bitacoraDao: BitacoraDao) {
         return bitacoraDao.obtenerPorDocente(docenteId)
     }
 
-    fun obtenerParaDocente(id: Int, docenteId: Int): Flow<Bitacora?> {
+    fun obtenerParaDocente(id: Int, docenteId: Int): Flow<List<Bitacora>> {
         return bitacoraDao.obtenerParaDocente(id, docenteId)
     }
 
