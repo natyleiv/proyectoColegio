@@ -16,7 +16,7 @@ val FondoSuave = Color(0xFFF7F9FF)
 val ColorBorrador = Color(0xFFE0E0E0)    // gris: borrador
 val ColorPendiente = Color(0xFFFFE082)   // amarillo: enviado, pendiente de revisión
 val ColorRevisado = Color(0xFFA5D6A7)    // verde: revisado
-val ColorPublicada = Color(0xFF81D4FA)   // celeste: bitácora activa
+val ColorPublicada = Color(0xFF4FC3F7)   // celeste intenso: bitácora activa / registro enviado
 val ColorCerrada = Color(0xFFBDBDBD)     // gris oscuro: bitácora cerrada
 
 // Fondo de tarjetas en modo claro (reemplaza el lila por defecto de Material 3)

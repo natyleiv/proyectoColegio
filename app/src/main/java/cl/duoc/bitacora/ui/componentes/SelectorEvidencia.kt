@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import cl.duoc.bitacora.util.crearUriFotografia
 import coil3.compose.AsyncImage
+import androidx.compose.animation.Crossfade
 
 // RECURSOS NATIVOS (clase 06):
 //  1) Photo Picker (galería) con PickVisualMedia
@@ -79,7 +80,17 @@ fun SelectorEvidencia(
             text = "Evidencia (opcional)",
             style = MaterialTheme.typography.titleMedium
         )
-
+        // Mensaje que cambia con un desvanecido cuando se adjunta o se quita la foto (PPT 06: Crossfade)
+        Crossfade(
+            targetState = fotoUri.isNotBlank(),
+            label = "Estado de la evidencia"
+        ) { hayFoto ->
+            Text(
+                text = if (hayFoto) "¡Foto adjunta!" else "Aún no adjuntas una foto",
+                color = if (hayFoto) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(
                 onClick = {
@@ -88,7 +99,11 @@ fun SelectorEvidencia(
                     )
                 }
             ) {
-                Icon(Icons.Filled.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Filled.PhotoLibrary,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
                 Text("  Galería")
             }
             Button(
@@ -103,7 +118,11 @@ fun SelectorEvidencia(
                     }
                 }
             ) {
-                Icon(Icons.Filled.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Filled.PhotoCamera,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
                 Text("  Cámara")
             }
         }
@@ -130,7 +149,11 @@ fun SelectorEvidencia(
                     contentScale = ContentScale.Crop
                 )
                 TextButton(onClick = { onQuitar() }) {
-                    Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                     Text("  Quitar foto")
                 }
             }

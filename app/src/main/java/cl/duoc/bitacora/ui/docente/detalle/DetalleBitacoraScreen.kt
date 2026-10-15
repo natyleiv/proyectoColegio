@@ -38,6 +38,7 @@ import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.nombreMes
+import androidx.compose.animation.Crossfade
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,19 +108,25 @@ fun DetalleBitacoraScreen(
                 }
 
                 // ---- Publicar / cerrar ----
+                // El botón cambia con un desvanecido según el estado de la bitácora (PPT 06: Crossfade)
                 item {
-                    when (bitacoraActual.estado) {
-                        EstadoBitacora.BORRADOR -> Button(
-                            onClick = { viewModel.publicar() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) { Text("Publicar bitácora") }
+                    Crossfade(
+                        targetState = bitacoraActual.estado,
+                        label = "Acción según estado de la bitácora"
+                    ) { estado ->
+                        when (estado) {
+                            EstadoBitacora.BORRADOR -> Button(
+                                onClick = { viewModel.publicar() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Publicar bitácora") }
 
-                        EstadoBitacora.PUBLICADA -> OutlinedButton(
-                            onClick = { viewModel.cerrar() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) { Text("Cerrar bitácora") }
+                            EstadoBitacora.PUBLICADA -> OutlinedButton(
+                                onClick = { viewModel.cerrar() },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("Cerrar bitácora") }
 
-                        else -> Text("Esta bitácora está cerrada.")
+                            else -> Text("Esta bitácora está cerrada.")
+                        }
                     }
                 }
 
