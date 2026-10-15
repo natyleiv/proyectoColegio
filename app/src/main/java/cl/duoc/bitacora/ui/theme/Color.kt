@@ -18,3 +18,15 @@ val ColorPendiente = Color(0xFFFFE082)   // amarillo: enviado, pendiente de revi
 val ColorRevisado = Color(0xFFA5D6A7)    // verde: revisado
 val ColorPublicada = Color(0xFF81D4FA)   // celeste: bitácora activa
 val ColorCerrada = Color(0xFFBDBDBD)     // gris oscuro: bitácora cerrada
+
+// Fondo de tarjetas en modo claro (reemplaza el lila por defecto de Material 3)
+val AzulTarjeta = Color(0xFFD3E0FA)
+
+// Paleta para modo oscuro (mismos tonos, versión clara para que se lean sobre fondo oscuro)
+val AzulPrimarioOscuro = Color(0xFFAFC6FF)
+val AzulContenedorOscuro = Color(0xFF1B3F8A)
+val NaranjaAcentoOscuro = Color(0xFFFFB866)
+val NaranjaContenedorOscuro = Color(0xFF5A3A00)
+val VerdeAcentoOscuro = Color(0xFF81C784)
+val FondoOscuro = Color(0xFF111318)
+val TarjetaOscura = Color(0xFF262B36)
