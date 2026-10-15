@@ -23,6 +23,9 @@ import cl.duoc.bitacora.ui.componentes.EtiquetasRegistro
 import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.util.Sesion
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import cl.duoc.bitacora.ui.componentes.EstadoVacio
 
 @Composable
 fun HistorialScreen(
@@ -44,11 +47,16 @@ fun HistorialScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (registros.isEmpty()) {
-                item { Text("Aún no tienes registros. Agrega uno desde una bitácora activa.") }
+                item {
+                    EstadoVacio(
+                        texto = "Aún no tienes registros.\nAgrega uno desde una bitácora activa.",
+                        icono = Icons.Filled.History
+                    )
+                }
             }
             items(registros) { registro ->
                 Card(

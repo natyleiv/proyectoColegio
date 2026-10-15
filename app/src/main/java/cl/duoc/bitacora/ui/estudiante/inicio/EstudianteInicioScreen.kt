@@ -31,6 +31,12 @@ import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.nombreMes
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Inbox
+import cl.duoc.bitacora.ui.componentes.EstadoVacio
+import cl.duoc.bitacora.ui.componentes.TarjetaBienvenida
+import cl.duoc.bitacora.ui.componentes.TituloSeccion
 
 @Composable
 fun EstudianteInicioScreen(
@@ -59,17 +65,15 @@ fun EstudianteInicioScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "Hola, ${Sesion.usuario?.nombre ?: ""}",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Text("Curso: ${Sesion.usuario?.curso ?: ""}")
-                }
+                TarjetaBienvenida(
+                    nombre = Sesion.usuario?.nombre ?: "",
+                    detalle = "Curso: ${Sesion.usuario?.curso ?: ""}",
+                    icono = Icons.Filled.Face
+                )
             }
             item {
                 OutlinedButton(
@@ -81,13 +85,18 @@ fun EstudianteInicioScreen(
                 }
             }
             item {
-                Text(
-                    text = "Bitácoras activas",
-                    style = MaterialTheme.typography.titleMedium
+                TituloSeccion(
+                    texto = "Bitácoras activas",
+                    icono = Icons.Filled.Book
                 )
             }
             if (bitacoras.isEmpty()) {
-                item { Text("Tu docente aún no ha publicado bitácoras para tu curso.") }
+                item {
+                    EstadoVacio(
+                        texto = "Tu docente aún no ha publicado\nbitácoras para tu curso.",
+                        icono = Icons.Filled.Inbox
+                    )
+                }
             }
             items(bitacoras) { bitacora ->
                 Card(modifier = Modifier.fillMaxWidth()) {

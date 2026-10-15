@@ -32,6 +32,16 @@ import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.nombreMes
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Class
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.School
+import androidx.compose.ui.Alignment
+import cl.duoc.bitacora.ui.componentes.EstadoVacio
+import cl.duoc.bitacora.ui.componentes.TarjetaBienvenida
+import cl.duoc.bitacora.ui.componentes.TituloSeccion
+
 
 @Composable
 fun DocenteInicioScreen(
@@ -68,35 +78,52 @@ fun DocenteInicioScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Text(
-                    text = "Hola, ${Sesion.usuario?.nombre ?: ""}",
-                    style = MaterialTheme.typography.headlineSmall
+                TarjetaBienvenida(
+                    nombre = Sesion.usuario?.nombre ?: "",
+                    detalle = "Crea y revisa las bitácoras de tus cursos",
+                    icono = Icons.Filled.School
                 )
             }
 
             // Cursos y asignaturas asignadas al docente
             item {
-                Text(
-                    text = "Mis cursos y asignaturas",
-                    style = MaterialTheme.typography.titleMedium
+                TituloSeccion(
+                    texto = "Mis cursos y asignaturas",
+                    icono = Icons.Filled.Groups
                 )
             }
             items(asignaciones) { asignacion ->
-                Text("• ${asignacion.curso} - ${asignacion.asignatura}")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Class,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text("${asignacion.curso} - ${asignacion.asignatura}")
+                }
             }
 
             item {
-                Text(
-                    text = "Bitácoras mensuales",
-                    style = MaterialTheme.typography.titleMedium
+                TituloSeccion(
+                    texto = "Bitácoras mensuales",
+                    icono = Icons.Filled.Book
                 )
             }
             if (bitacoras.isEmpty()) {
-                item { Text("Aún no has creado bitácoras. Usa el botón \"Nueva bitácora\".") }
+                item {
+                    EstadoVacio(
+                        texto = "Aún no has creado bitácoras.\nUsa el botón \"Nueva bitácora\".",
+                        icono = Icons.Filled.Book
+                    )
+                }
             }
             items(bitacoras) { bitacora ->
                 Card(
