@@ -46,32 +46,50 @@ class CrearBitacoraViewModel(
                 initialValue = emptyList()
             )
 
+    // Cada cambio guarda el valor y, si el campo tenía error, lo quita apenas sea válido
     fun cambiarAsignacion(id: Int) {
-        _uiState.update { it.copy(asignacionId = id) }
+        _uiState.update {
+            it.copy(
+                asignacionId = id,
+                errorAsignacion = it.errorAsignacion && !validarAsignacionSeleccionada(id)
+            )
+        }
     }
 
     fun cambiarTitulo(valor: String) {
-        _uiState.update { it.copy(titulo = valor) }
+        _uiState.update {
+            it.copy(titulo = valor, errorTitulo = it.errorTitulo && !validarLargoMinimo(valor, 5))
+        }
     }
 
     fun cambiarProposito(valor: String) {
-        _uiState.update { it.copy(proposito = valor) }
+        _uiState.update {
+            it.copy(proposito = valor, errorProposito = it.errorProposito && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarInstrucciones(valor: String) {
-        _uiState.update { it.copy(instrucciones = valor) }
+        _uiState.update {
+            it.copy(instrucciones = valor, errorInstrucciones = it.errorInstrucciones && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarPreguntas(valor: String) {
-        _uiState.update { it.copy(preguntas = valor) }
+        _uiState.update {
+            it.copy(preguntas = valor, errorPreguntas = it.errorPreguntas && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarMes(valor: String) {
-        _uiState.update { it.copy(mes = valor) }
+        _uiState.update {
+            it.copy(mes = valor, errorMes = it.errorMes && !validarMes(valor))
+        }
     }
 
     fun cambiarAnio(valor: String) {
-        _uiState.update { it.copy(anio = valor) }
+        _uiState.update {
+            it.copy(anio = valor, errorAnio = it.errorAnio && !validarAnio(valor))
+        }
     }
 
     // Valida cada campo y, si todo está bien, guarda la bitácora como BORRADOR

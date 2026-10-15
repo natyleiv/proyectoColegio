@@ -40,7 +40,9 @@ class RevisarRegistroViewModel(
     }
 
     fun cambiarComentario(valor: String) {
-        _uiState.update { it.copy(comentario = valor) }
+        _uiState.update {
+            it.copy(comentario = valor, errorComentario = it.errorComentario && !validarLargoMinimo(valor, 5))
+        }
     }
 
     // Guarda la retroalimentación y marca el aporte como revisado

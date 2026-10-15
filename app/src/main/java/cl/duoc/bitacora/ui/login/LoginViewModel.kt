@@ -34,13 +34,22 @@ class LoginViewModel(
 
     fun cambiarCorreo(nuevoCorreo: String) {
         _uiState.update { estadoActual ->
-            estadoActual.copy(correo = nuevoCorreo, errorCredenciales = false)
+            estadoActual.copy(
+                correo = nuevoCorreo,
+                // Si el campo estaba con error, se quita apenas el correo sea válido
+                errorCorreo = estadoActual.errorCorreo && !validarCorreo(nuevoCorreo.trim()),
+                errorCredenciales = false
+            )
         }
     }
 
     fun cambiarPassword(nuevoPassword: String) {
         _uiState.update { estadoActual ->
-            estadoActual.copy(password = nuevoPassword, errorCredenciales = false)
+            estadoActual.copy(
+                password = nuevoPassword,
+                errorPassword = estadoActual.errorPassword && !validarPassword(nuevoPassword),
+                errorCredenciales = false
+            )
         }
     }
 

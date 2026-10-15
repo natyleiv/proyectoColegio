@@ -94,19 +94,27 @@ class NuevoRegistroViewModel(
     }
 
     fun cambiarFecha(valor: String) {
-        _uiState.update { it.copy(fechaClase = valor) }
+        _uiState.update {
+            it.copy(fechaClase = valor, errorFecha = it.errorFecha && !validarFechaClase(valor))
+        }
     }
 
     fun cambiarContenido(valor: String) {
-        _uiState.update { it.copy(contenido = valor) }
+        _uiState.update {
+            it.copy(contenido = valor, errorContenido = it.errorContenido && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarActividad(valor: String) {
-        _uiState.update { it.copy(actividad = valor) }
+        _uiState.update {
+            it.copy(actividad = valor, errorActividad = it.errorActividad && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarAprendizaje(valor: String) {
-        _uiState.update { it.copy(aprendizaje = valor) }
+        _uiState.update {
+            it.copy(aprendizaje = valor, errorAprendizaje = it.errorAprendizaje && !validarCampoObligatorio(valor))
+        }
     }
 
     fun cambiarDudas(valor: String) {
@@ -114,7 +122,9 @@ class NuevoRegistroViewModel(
     }
 
     fun cambiarEnlace(valor: String) {
-        _uiState.update { it.copy(enlace = valor) }
+        _uiState.update {
+            it.copy(enlace = valor, errorEnlace = it.errorEnlace && !validarEnlace(valor))
+        }
     }
 
     // ---- Evidencias ----
