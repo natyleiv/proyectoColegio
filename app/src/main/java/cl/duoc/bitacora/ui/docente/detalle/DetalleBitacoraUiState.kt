@@ -1,6 +1,6 @@
 package cl.duoc.bitacora.ui.docente.detalle
 
-import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.data.RegistroDetalle
 
 const val FILTRO_TODOS = "TODOS"
 const val FILTRO_PENDIENTES = "PENDIENTES"
@@ -8,7 +8,7 @@ const val FILTRO_REVISADOS = "REVISADOS"
 
 data class DetalleBitacoraUiState(
     // Lista ya filtrada que se muestra en pantalla
-    val registros: List<Registro> = emptyList(),
+    val registros: List<RegistroDetalle> = emptyList(),
     val filtroEstado: String = FILTRO_TODOS,
     val busqueda: String = "",
 

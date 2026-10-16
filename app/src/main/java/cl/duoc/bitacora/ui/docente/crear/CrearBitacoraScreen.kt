@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
@@ -27,12 +26,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.bitacora.ui.componentes.CampoFecha
 import cl.duoc.bitacora.ui.componentes.CampoFormulario
+import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
+import cl.duoc.bitacora.util.nombreMes
+import cl.duoc.bitacora.util.primerDiaParaCalendario
+import cl.duoc.bitacora.util.validarAnio
+import cl.duoc.bitacora.util.validarMes
 
 @Composable
 fun CrearBitacoraScreen(
@@ -43,13 +47,15 @@ fun CrearBitacoraScreen(
     val asignaciones by viewModel.asignaciones.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    MensajeSesion(snackbarHostState)
+
     // Al guardar correctamente volvemos a la pantalla anterior
     LaunchedEffect(uiState.guardada) {
         if (uiState.guardada) onVolver()
     }
 
     PantallaBase(
-        titulo = "Nueva bitácora",
+        titulo = if (uiState.modoEdicion) "Editar bitácora" else "Nueva bitácora",
         snackbarHostState = snackbarHostState,
         onVolver = onVolver
     ) { innerPadding ->
@@ -86,28 +92,20 @@ fun CrearBitacoraScreen(
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CampoFormulario(
-                    valor = uiState.mes,
-                    onValorChange = { viewModel.cambiarMes(it) },
-                    etiqueta = "Mes (1-12)",
-                    icono = Icons.Filled.DateRange,
-                    hayError = uiState.errorMes,
-                    mensajeError = "Mes entre 1 y 12",
-                    teclado = KeyboardType.Number,
-                    modifier = Modifier.weight(1f)
-                )
-                CampoFormulario(
-                    valor = uiState.anio,
-                    onValorChange = { viewModel.cambiarAnio(it) },
-                    etiqueta = "Año",
-                    icono = Icons.Filled.DateRange,
-                    hayError = uiState.errorAnio,
-                    mensajeError = "Año válido (ej: 2026)",
-                    teclado = KeyboardType.Number,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            // Mes y año se eligen en el calendario (no se escriben a mano)
+            val fechaValida = validarMes(uiState.mes) && validarAnio(uiState.anio)
+            CampoFecha(
+                textoMostrado = if (fechaValida) {
+                    "${nombreMes(uiState.mes.toInt())} ${uiState.anio}"
+                } else "",
+                etiqueta = "Mes y año de la bitácora",
+                hayError = uiState.errorMes || uiState.errorAnio,
+                mensajeError = "Elija el mes y año en el calendario",
+                onFechaElegida = { viewModel.elegirMesAnio(it) },
+                fechaInicial = if (fechaValida) {
+                    primerDiaParaCalendario(uiState.mes.toInt(), uiState.anio.toInt())
+                } else null
+            )
 
             CampoFormulario(
                 valor = uiState.titulo,
@@ -153,7 +151,7 @@ fun CrearBitacoraScreen(
                 onClick = { viewModel.guardar() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Guardar bitácora")
+                Text(if (uiState.modoEdicion) "Guardar cambios" else "Guardar bitácora")
             }
         }
     }

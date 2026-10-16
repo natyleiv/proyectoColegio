@@ -7,7 +7,8 @@ import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.BitacoraRepository
 import cl.duoc.bitacora.data.RegistroRepository
 import cl.duoc.bitacora.data.UsuarioRepository
-import cl.duoc.bitacora.model.Bitacora
+import cl.duoc.bitacora.data.BitacoraDetalle
+import cl.duoc.bitacora.model.PreguntaOrientadora
 import cl.duoc.bitacora.model.EstadoRevision
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.fechaHoy
@@ -26,19 +27,29 @@ class DetalleBitacoraViewModel(
     private val database = AppDatabase.getInstance(application)
     private val bitacoraRepository = BitacoraRepository(database.bitacoraDao())
     private val registroRepository = RegistroRepository(database.registroDao())
-    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao())
+    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
 
     private val bitacoraId = Sesion.bitacoraId
     private val docenteId = Sesion.usuario?.id ?: 0
 
     // null = todavía cargando · lista vacía = sin acceso · lista con 1 = la bitácora
-    val bitacora: StateFlow<List<Bitacora>?> =
+    val bitacora: StateFlow<List<BitacoraDetalle>?> =
         bitacoraRepository
             .obtenerParaDocente(bitacoraId, docenteId)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = null
+            )
+
+    // Preguntas orientadoras (tabla aparte, una fila por pregunta)
+    val preguntas: StateFlow<List<PreguntaOrientadora>> =
+        bitacoraRepository
+            .obtenerPreguntas(bitacoraId)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
             )
 
     private val registros =
@@ -100,15 +111,23 @@ class DetalleBitacoraViewModel(
 
     fun publicar() {
         viewModelScope.launch {
-            bitacoraRepository.publicar(bitacoraId, docenteId, fechaHoy())
-            Sesion.mensaje = "Bitácora publicada: los estudiantes ya pueden participar."
+            try {
+                bitacoraRepository.publicar(bitacoraId, docenteId, fechaHoy())
+                Sesion.exito("Bitácora publicada: los estudiantes ya pueden participar.")
+            } catch (e: Exception) {
+                Sesion.error("No se pudo publicar la bitácora. Intenta nuevamente.")
+            }
         }
     }
 
     fun cerrar() {
         viewModelScope.launch {
-            bitacoraRepository.cerrar(bitacoraId, docenteId, fechaHoy())
-            Sesion.mensaje = "Bitácora cerrada."
+            try {
+                bitacoraRepository.cerrar(bitacoraId, docenteId, fechaHoy())
+                Sesion.advertencia("Bitácora cerrada: ya no se reciben más aportes.")
+            } catch (e: Exception) {
+                Sesion.error("No se pudo cerrar la bitácora. Intenta nuevamente.")
+            }
         }
     }
 }

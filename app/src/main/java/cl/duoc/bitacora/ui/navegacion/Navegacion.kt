@@ -21,6 +21,7 @@ import cl.duoc.bitacora.util.Sesion
 private const val LOGIN = "login"
 private const val DOCENTE_INICIO = "docente_inicio"
 private const val DOCENTE_CREAR = "docente_crear"
+private const val DOCENTE_EDITAR = "docente_editar"
 private const val DOCENTE_DETALLE = "docente_detalle"
 private const val DOCENTE_REVISAR = "docente_revisar"
 private const val ESTUDIANTE_INICIO = "estudiante_inicio"
@@ -91,6 +92,15 @@ fun Navegacion() {
         }
         composable(DOCENTE_CREAR) {
             AccesoPorPerfil(Perfil.DOCENTE, onSinAcceso = { cerrarSesion() }) {
+                // Modo "crear": formulario vacío
+                Sesion.modoEdicion = false
+                CrearBitacoraScreen(onVolver = { navController.popBackStack() })
+            }
+        }
+        composable(DOCENTE_EDITAR) {
+            AccesoPorPerfil(Perfil.DOCENTE, onSinAcceso = { cerrarSesion() }) {
+                // Mismo formulario, pero cargado con la bitácora Sesion.bitacoraId
+                Sesion.modoEdicion = true
                 CrearBitacoraScreen(onVolver = { navController.popBackStack() })
             }
         }
@@ -98,7 +108,8 @@ fun Navegacion() {
             AccesoPorPerfil(Perfil.DOCENTE, onSinAcceso = { cerrarSesion() }) {
                 DetalleBitacoraScreen(
                     onVolver = { navController.popBackStack() },
-                    onAbrirRegistro = { navController.navigate(DOCENTE_REVISAR) }
+                    onAbrirRegistro = { navController.navigate(DOCENTE_REVISAR) },
+                    onEditar = { navController.navigate(DOCENTE_EDITAR) }
                 )
             }
         }

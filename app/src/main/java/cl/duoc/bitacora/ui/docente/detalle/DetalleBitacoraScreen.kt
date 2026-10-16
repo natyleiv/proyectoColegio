@@ -41,7 +41,10 @@ import cl.duoc.bitacora.util.nombreMes
 import androidx.compose.animation.Crossfade
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import cl.duoc.bitacora.ui.componentes.EstadoVacio
 import cl.duoc.bitacora.ui.componentes.TituloSeccion
 
@@ -50,10 +53,12 @@ import cl.duoc.bitacora.ui.componentes.TituloSeccion
 fun DetalleBitacoraScreen(
     onVolver: () -> Unit,
     onAbrirRegistro: () -> Unit,
+    onEditar: () -> Unit,
     viewModel: DetalleBitacoraViewModel = viewModel()
 ) {
     val bitacora by viewModel.bitacora.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val preguntas by viewModel.preguntas.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     MensajeSesion(snackbarHostState)
@@ -110,7 +115,9 @@ fun DetalleBitacoraScreen(
                             Text("Propósito: ${bitacoraActual.proposito}")
                             Text("Instrucciones: ${bitacoraActual.instrucciones}")
                             Text("Preguntas orientadoras:")
-                            Text(bitacoraActual.preguntas)
+                            preguntas.forEach { pregunta ->
+                                Text("${pregunta.orden}. ${pregunta.texto}")
+                            }
                             if (bitacoraActual.fechaPublicacion.isNotBlank()) {
                                 Text("Publicada el ${bitacoraActual.fechaPublicacion}")
                             }
@@ -129,10 +136,23 @@ fun DetalleBitacoraScreen(
                         label = "Acción según estado de la bitácora"
                     ) { estado ->
                         when (estado) {
-                            EstadoBitacora.BORRADOR -> Button(
-                                onClick = { viewModel.publicar() },
-                                modifier = Modifier.fillMaxWidth()
-                            ) { Text("Publicar bitácora") }
+                            // En BORRADOR el docente puede editar la bitácora antes de publicarla
+                            EstadoBitacora.BORRADOR -> Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { viewModel.publicar() },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { Text("Publicar bitácora") }
+                                OutlinedButton(
+                                    onClick = { onEditar() },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(Icons.Filled.Edit, contentDescription = null)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Editar bitácora")
+                                }
+                            }
 
                             EstadoBitacora.PUBLICADA -> OutlinedButton(
                                 onClick = { viewModel.cerrar() },

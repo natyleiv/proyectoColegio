@@ -6,16 +6,19 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.BitacoraRepository
 import cl.duoc.bitacora.data.UsuarioRepository
-import cl.duoc.bitacora.model.Asignacion
+import cl.duoc.bitacora.data.AsignacionDetalle
 import cl.duoc.bitacora.model.Bitacora
 import cl.duoc.bitacora.model.EstadoBitacora
 import cl.duoc.bitacora.util.Sesion
+import cl.duoc.bitacora.util.anioDeCalendario
+import cl.duoc.bitacora.util.mesDeCalendario
 import cl.duoc.bitacora.util.validarAnio
 import cl.duoc.bitacora.util.validarAsignacionSeleccionada
 import cl.duoc.bitacora.util.validarCampoObligatorio
 import cl.duoc.bitacora.util.validarLargoMinimo
 import cl.duoc.bitacora.util.validarMes
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,15 +32,54 @@ class CrearBitacoraViewModel(
 
     private val database = AppDatabase.getInstance(application)
     private val bitacoraRepository = BitacoraRepository(database.bitacoraDao())
-    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao())
+    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
 
     private val docenteId = Sesion.usuario?.id ?: 0
 
-    private val _uiState = MutableStateFlow(CrearBitacoraUiState())
+    // Modo editar: se decide al abrir la pantalla (ver Navegacion) y no cambia mientras dura
+    private val modoEdicion = Sesion.modoEdicion
+    private val bitacoraEditadaId = Sesion.bitacoraId
+
+    private val _uiState = MutableStateFlow(CrearBitacoraUiState(modoEdicion = modoEdicion))
     val uiState: StateFlow<CrearBitacoraUiState> = _uiState.asStateFlow()
 
+    init {
+        // Si se está editando, carga los datos actuales de la bitácora en el formulario
+        if (modoEdicion) {
+            viewModelScope.launch {
+                try {
+                    val encontradas = bitacoraRepository
+                        .obtenerParaDocente(bitacoraEditadaId, docenteId)
+                        .first()
+                    val actual = encontradas.firstOrNull()
+                    if (actual == null || actual.estado != EstadoBitacora.BORRADOR) {
+                        // No existe, no es de este docente o ya fue publicada
+                        Sesion.error("Esta bitácora ya no se puede editar.")
+                        _uiState.update { it.copy(guardada = true) }
+                    } else {
+                        val preguntas = bitacoraRepository.obtenerPreguntasUnaVez(actual.id)
+                        _uiState.update {
+                            it.copy(
+                                asignacionId = actual.asignacionId,
+                                titulo = actual.titulo,
+                                proposito = actual.proposito,
+                                instrucciones = actual.instrucciones,
+                                preguntas = preguntas.joinToString("\n") { p -> p.texto },
+                                mes = actual.mes.toString(),
+                                anio = actual.anio.toString()
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Sesion.error("No se pudo cargar la bitácora.")
+                    _uiState.update { it.copy(guardada = true) }
+                }
+            }
+        }
+    }
+
     // Solo se ofrecen los cursos/asignaturas asignados a este docente
-    val asignaciones: StateFlow<List<Asignacion>> =
+    val asignaciones: StateFlow<List<AsignacionDetalle>> =
         usuarioRepository
             .obtenerAsignaciones(docenteId)
             .stateIn(
@@ -80,15 +122,17 @@ class CrearBitacoraViewModel(
         }
     }
 
-    fun cambiarMes(valor: String) {
+    // El calendario entrega el día elegido (milisegundos UTC); de ahí se toman mes y año
+    fun elegirMesAnio(millisUtc: Long) {
+        val mesElegido = mesDeCalendario(millisUtc)
+        val anioElegido = anioDeCalendario(millisUtc)
         _uiState.update {
-            it.copy(mes = valor, errorMes = it.errorMes && !validarMes(valor))
-        }
-    }
-
-    fun cambiarAnio(valor: String) {
-        _uiState.update {
-            it.copy(anio = valor, errorAnio = it.errorAnio && !validarAnio(valor))
+            it.copy(
+                mes = mesElegido.toString(),
+                anio = anioElegido.toString(),
+                errorMes = false,
+                errorAnio = false
+            )
         }
     }
 
@@ -132,22 +176,45 @@ class CrearBitacoraViewModel(
                 return
             }
 
-            val bitacora = Bitacora(
-                titulo = estado.titulo.trim(),
-                proposito = estado.proposito.trim(),
-                instrucciones = estado.instrucciones.trim(),
-                preguntas = estado.preguntas.trim(),
-                curso = asignacion.curso,
-                asignatura = asignacion.asignatura,
-                mes = estado.mes.trim().toInt(),
-                anio = estado.anio.trim().toInt(),
-                docenteId = docenteId,
-                estado = EstadoBitacora.BORRADOR
-            )
+            // Una pregunta por línea; las líneas vacías se ignoran
+            val preguntas = estado.preguntas
+                .lines()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+
             viewModelScope.launch {
-                bitacoraRepository.guardar(bitacora)
-                Sesion.mensaje = "Bitácora creada como borrador. Ábrela para publicarla."
-                _uiState.update { it.copy(guardada = true) }
+                // Si falla la base de datos se muestra un mensaje de ERROR (no se cierra la app)
+                try {
+                    if (modoEdicion) {
+                        bitacoraRepository.editar(
+                            id = bitacoraEditadaId,
+                            docenteId = docenteId,
+                            asignacionId = asignacion.id,
+                            titulo = estado.titulo.trim(),
+                            proposito = estado.proposito.trim(),
+                            instrucciones = estado.instrucciones.trim(),
+                            mes = estado.mes.trim().toInt(),
+                            anio = estado.anio.trim().toInt(),
+                            preguntas = preguntas
+                        )
+                        Sesion.exito("Cambios guardados en la bitácora.")
+                    } else {
+                        val bitacora = Bitacora(
+                            asignacionId = asignacion.id,
+                            titulo = estado.titulo.trim(),
+                            proposito = estado.proposito.trim(),
+                            instrucciones = estado.instrucciones.trim(),
+                            mes = estado.mes.trim().toInt(),
+                            anio = estado.anio.trim().toInt(),
+                            estado = EstadoBitacora.BORRADOR
+                        )
+                        bitacoraRepository.guardar(bitacora, preguntas)
+                        Sesion.exito("Bitácora creada como borrador. Ábrela para publicarla.")
+                    }
+                    _uiState.update { it.copy(guardada = true) }
+                } catch (e: Exception) {
+                    Sesion.error("No se pudo guardar la bitácora. Intenta nuevamente.")
+                }
             }
         }
     }
