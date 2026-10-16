@@ -23,6 +23,7 @@ import cl.duoc.bitacora.ui.theme.ColorBorrador
 import cl.duoc.bitacora.ui.theme.ColorCerrada
 import cl.duoc.bitacora.ui.theme.ColorExitoSuave
 import cl.duoc.bitacora.ui.theme.ColorPublicada
+import cl.duoc.bitacora.ui.theme.TextoSobreEtiqueta
 
 // Etiqueta de color. Si el estado cambia, el color cambia con una animación (animateColorAsState).
 @Composable
@@ -38,7 +39,7 @@ fun EtiquetaEstado(texto: String, colorObjetivo: Color) {
     ) {
         Text(
             text = texto,
-            color = Color.Black,
+            color = TextoSobreEtiqueta,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
         )

@@ -34,6 +34,9 @@ val TextoSobreExito = Color(0xFFFFFFFF)
 val TextoSobreError = Color(0xFFFFFFFF)
 val TextoSobreAdvertencia = Color(0xFF1B1B1B)
 
+// Texto oscuro que se usa sobre las etiquetas de estado de colores suaves
+val TextoSobreEtiqueta = Color(0xFF1B1B1B)
+
 // Fondo de tarjetas en modo claro (reemplaza el lila por defecto de Material 3)
 val AzulTarjeta = Color(0xFFD3E0FA)
 
