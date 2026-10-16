@@ -6,16 +6,6 @@ Proyecto de la **Evaluación Parcial 2** de *DSY1105 – Desarrollo de Aplicacio
 
 > Todo el contenido (usuarios, cursos, bitácoras y registros) es **ficticio**. No se usan datos reales de estudiantes.
 
-## Integrantes
-
-| Nombre | Rol en el equipo |
-|---|---|
-| [Nombre y apellido integrante 1] | [por completar] |
-| [Nombre y apellido integrante 2] | [por completar] |
-
-- Equipo: [N.º de equipo]
-- Planificación en Trello: [pegar enlace del tablero]
-
 ## Problema que resuelve
 
 Los estudiantes registran lo aprendido en cuadernos, guías y fotos sueltas, y el docente no tiene un lugar
@@ -26,7 +16,8 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 
 **Docente**
 - Inicio de sesión con cuenta ficticia y consulta de sus cursos y asignaturas asignados.
-- Crear bitácora mensual (curso, asignatura, mes, año, título, propósito, instrucciones y preguntas orientadoras).
+- Crear bitácora mensual (curso, asignatura, mes y año elegidos en un **calendario**, título, propósito, instrucciones y preguntas orientadoras).
+- **Editar** una bitácora mientras está en borrador (formulario con los datos cargados).
 - Publicar y cerrar una bitácora.
 - Ver los aportes enviados, con filtros por estado (todos, pendientes, revisados) y búsqueda por estudiante o fecha.
 - Ver indicadores de participación (participaron / total, sin participación, aportes revisados y pendientes).
@@ -34,10 +25,16 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 
 **Estudiante**
 - Inicio de sesión con cuenta ficticia y consulta de las bitácoras activas de su curso.
-- Crear un registro de clase (fecha, contenido, actividad, aprendizaje, dudas y enlace).
+- Crear un registro de clase (fecha elegida en un **calendario** —los días futuros están bloqueados—, contenido, actividad, aprendizaje, dudas y enlace).
 - Guardar como **borrador** y seguir editándolo, o **enviar** al docente.
 - Adjuntar una foto desde la **galería** (Photo Picker) o con la **cámara**.
 - Consultar su historial, el estado de cada aporte (borrador / enviado / pendiente / revisado) y la retroalimentación.
+
+**Mensajes y colores**
+- Cada operación muestra un mensaje en un Snackbar: **verde** (éxito), **ámbar** (advertencia) o **rojo** (error de la operación,
+  por ejemplo si no se pudo guardar). Los colores están centralizados en `ui/theme/Color.kt` (`ColorExito`, `ColorAdvertencia`, `ColorError`).
+- El contenido se adapta a pantallas anchas (tablet / horizontal): queda centrado con un ancho máximo (`PantallaBase`).
+- Ícono propio de la aplicación (cuaderno con check) en `res/drawable/ic_launcher_*.xml` y `res/mipmap-*`.
 
 **Seguridad (control de acceso)**
 - Cada pantalla valida el perfil (docente / estudiante) antes de mostrarse.
@@ -54,7 +51,38 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 | Animaciones funcionales | `AnimatedVisibility`, `animateColorAsState`, `animateFloatAsState` (ver `LoginScreen`, `EtiquetaEstado`, `SelectorEvidencia`, `DetalleBitacoraScreen`) |
 | Estructura modular, MVVM y persistencia local | paquetes `model`, `data` (Room), `ui`, `util`; cada pantalla con `Screen`, `ViewModel` y `UiState` |
 | Dos recursos nativos | Photo Picker (galería) y cámara con `FileProvider` (`ui/componentes/SelectorEvidencia.kt`, `util/ImagenUtils.kt`) |
-| GitHub + Trello | Este repositorio y el tablero de Trello indicado arriba |
+| Modelo de datos relacional con claves primarias, foráneas y relaciones | 8 tablas normalizadas (3FN), ver sección siguiente; `model/` y `data/AppDatabase.kt` |
+| Mensajes de éxito **y** de error, colores semánticos | `ui/componentes/PantallaBase.kt` (`MensajeSesion`), `Sesion.exito/advertencia/error`, `ui/theme/Color.kt` |
+| Editar bitácoras | `ui/docente/crear/` (modo edición) y botón "Editar bitácora" en `DetalleBitacoraScreen` |
+| Diseño adaptable a distintos tamaños de pantalla | `PantallaBase` (contenido centrado, ancho máximo 720 dp) |
+| GitHub + Trello | Este repositorio y el tablero de Trello del equipo |
+
+## Modelo de datos (normalizado, 3FN)
+
+```
+cursos 1───N usuarios (estudiantes: cursoId)
+cursos 1───N asignaciones N───1 asignaturas
+usuarios(docente) 1───N asignaciones
+asignaciones 1───N bitacoras 1───N preguntas_orientadoras
+bitacoras 1───N registros N───1 usuarios(estudiante)
+registros 1───0..1 retroalimentaciones N───1 usuarios(docente)
+```
+
+| Tabla | Clave primaria | Claves foráneas |
+|---|---|---|
+| `cursos` | id | — |
+| `asignaturas` | id | — |
+| `usuarios` | id | cursoId → cursos (solo estudiantes) |
+| `asignaciones` | id | docenteId → usuarios, cursoId → cursos, asignaturaId → asignaturas |
+| `bitacoras` | id | asignacionId → asignaciones |
+| `preguntas_orientadoras` | id | bitacoraId → bitacoras |
+| `registros` | id | bitacoraId → bitacoras, estudianteId → usuarios |
+| `retroalimentaciones` | id | registroId → registros (único), docenteId → usuarios |
+
+Por qué está normalizado: el nombre del curso, de la asignatura, del docente y del estudiante se guardan **una sola vez** y las demás
+tablas los referencian por id; las preguntas orientadoras son filas propias (una bitácora tiene muchas); y el estado
+*pendiente / revisado* de un registro se deduce de si existe su retroalimentación, así no se guarda dos veces.
+Las pantallas reciben los nombres ya resueltos mediante consultas con `JOIN` (`data/Consultas.kt`).
 
 ## Alcance de este avance (no implementado todavía)
 
@@ -71,8 +99,8 @@ Kotlin 2.2.10 · Jetpack Compose (BOM 2026.02.01) · Material 3 · Navigation Co
 
 ```
 app/src/main/java/cl/duoc/bitacora/
-├── model/        Entidades Room (Usuario, Asignacion, Bitacora, Registro) y constantes de estado
-├── data/         DAO, Repository, AppDatabase y datos de prueba
+├── model/        Entidades Room (Curso, Asignatura, Usuario, Asignacion, Bitacora, PreguntaOrientadora, Registro, Retroalimentacion) y constantes
+├── data/         DAO, Repository, consultas con JOIN (Consultas.kt), AppDatabase y datos de prueba
 ├── ui/
 │   ├── login/, docente/..., estudiante/...   Screen + ViewModel + UiState por pantalla
 │   ├── componentes/                          Componentes reutilizables
@@ -96,5 +124,7 @@ app/src/main/java/cl/duoc/bitacora/
 | Docente (6°B Historia) | docente2@escuela.cl | docente123 |
 | Estudiante 5°A | alumno1@escuela.cl … alumno4@escuela.cl | alumno123 |
 | Estudiante 6°B | alumno5@escuela.cl | alumno123 |
+
+**Importante:** el esquema de la base cambió respecto de versiones anteriores (ahora el archivo es `bitacora_v2.db`). Si ya tenías la app instalada, desinstálala del emulador antes de ejecutar esta versión.
 
 Para empezar de cero (borrar datos de prueba): desinstalar la app del emulador y volver a ejecutarla.
