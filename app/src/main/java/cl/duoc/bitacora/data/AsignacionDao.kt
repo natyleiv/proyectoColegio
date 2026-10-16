@@ -12,6 +12,17 @@ interface AsignacionDao {
     @Insert
     suspend fun insertar(asignacion: Asignacion)
 
-    @Query("SELECT * FROM asignaciones WHERE docenteId = :docenteId ORDER BY curso, asignatura")
-    fun obtenerPorDocente(docenteId: Int): Flow<List<Asignacion>>
+    // Asignaciones del docente con el nombre del curso y de la asignatura (JOIN)
+    @Query(
+        """
+        SELECT a.id AS id, a.cursoId AS cursoId, c.nombre AS curso,
+               a.asignaturaId AS asignaturaId, s.nombre AS asignatura
+        FROM asignaciones a
+        INNER JOIN cursos c ON c.id = a.cursoId
+        INNER JOIN asignaturas s ON s.id = a.asignaturaId
+        WHERE a.docenteId = :docenteId
+        ORDER BY c.nombre, s.nombre
+        """
+    )
+    fun obtenerPorDocente(docenteId: Int): Flow<List<AsignacionDetalle>>
 }

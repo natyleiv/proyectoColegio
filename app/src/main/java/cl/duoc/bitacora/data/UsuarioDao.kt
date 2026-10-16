@@ -19,13 +19,14 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
     suspend fun buscarPorCorreo(correo: String): Usuario?
 
-    // Estudiantes del curso de una bitácora, SOLO si la bitácora pertenece al docente indicado.
-    // Así un docente no puede ver estudiantes de cursos que no tiene asignados.
+    // Estudiantes del curso de una bitácora, SOLO si la bitácora es del docente indicado.
+    // Ruta: bitácora -> asignación (docente y curso) -> estudiantes de ese curso.
     @Query(
         """
         SELECT u.* FROM usuarios u
-        INNER JOIN bitacoras b ON u.curso = b.curso
-        WHERE b.id = :bitacoraId AND b.docenteId = :docenteId AND u.perfil = 'ESTUDIANTE'
+        INNER JOIN asignaciones a ON u.cursoId = a.cursoId
+        INNER JOIN bitacoras b ON b.asignacionId = a.id
+        WHERE b.id = :bitacoraId AND a.docenteId = :docenteId AND u.perfil = 'ESTUDIANTE'
         ORDER BY u.nombre
         """
     )

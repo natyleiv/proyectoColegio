@@ -5,6 +5,7 @@ import androidx.room3.Insert
 import androidx.room3.Query
 import androidx.room3.Update
 import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.model.Retroalimentacion
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,42 +17,119 @@ interface RegistroDao {
     @Update
     suspend fun actualizar(registro: Registro)
 
-    // ---- Estudiante: solo ve SUS registros ----
-    @Query("SELECT * FROM registros WHERE estudianteId = :estudianteId ORDER BY fechaCreacion DESC")
-    fun obtenerPorEstudiante(estudianteId: Int): Flow<List<Registro>>
+    @Insert
+    suspend fun insertarRetroalimentacion(retro: Retroalimentacion)
 
+    // Registro "crudo" (para editar un borrador del estudiante)
     @Query("SELECT * FROM registros WHERE id = :id AND estudianteId = :estudianteId")
-    suspend fun obtenerDeEstudiante(id: Int, estudianteId: Int): Registro?
+    suspend fun obtenerCrudoDeEstudiante(id: Int, estudianteId: Int): List<Registro>
+
+    // ---- Estudiante: solo ve SUS registros ----
+    @Query(
+        """
+        SELECT r.id AS id, r.bitacoraId AS bitacoraId, r.estudianteId AS estudianteId,
+               r.fechaClase AS fechaClase, r.contenido AS contenido, r.actividad AS actividad,
+               r.aprendizaje AS aprendizaje, r.dudas AS dudas, r.fotoUri AS fotoUri,
+               r.enlace AS enlace, r.estadoEnvio AS estadoEnvio,
+               r.fechaCreacion AS fechaCreacion, r.fechaEnvio AS fechaEnvio,
+               b.titulo AS bitacoraTitulo, u.nombre AS estudianteNombre,
+               COALESCE(t.comentario, '') AS comentarioDocente,
+               COALESCE(t.fecha, 0) AS fechaRetro,
+               CASE WHEN t.id IS NULL THEN 'PENDIENTE' ELSE 'REVISADO' END AS estadoRevision
+        FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN usuarios u ON u.id = r.estudianteId
+        LEFT JOIN retroalimentaciones t ON t.registroId = r.id
+        WHERE r.estudianteId = :estudianteId
+        ORDER BY r.fechaCreacion DESC
+        """
+    )
+    fun obtenerPorEstudiante(estudianteId: Int): Flow<List<RegistroDetalle>>
+
+    @Query(
+        """
+        SELECT r.id AS id, r.bitacoraId AS bitacoraId, r.estudianteId AS estudianteId,
+               r.fechaClase AS fechaClase, r.contenido AS contenido, r.actividad AS actividad,
+               r.aprendizaje AS aprendizaje, r.dudas AS dudas, r.fotoUri AS fotoUri,
+               r.enlace AS enlace, r.estadoEnvio AS estadoEnvio,
+               r.fechaCreacion AS fechaCreacion, r.fechaEnvio AS fechaEnvio,
+               b.titulo AS bitacoraTitulo, u.nombre AS estudianteNombre,
+               COALESCE(t.comentario, '') AS comentarioDocente,
+               COALESCE(t.fecha, 0) AS fechaRetro,
+               CASE WHEN t.id IS NULL THEN 'PENDIENTE' ELSE 'REVISADO' END AS estadoRevision
+        FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN usuarios u ON u.id = r.estudianteId
+        LEFT JOIN retroalimentaciones t ON t.registroId = r.id
+        WHERE r.id = :id AND r.estudianteId = :estudianteId
+        """
+    )
+    suspend fun obtenerDeEstudiante(id: Int, estudianteId: Int): List<RegistroDetalle>
 
     // ---- Docente: solo registros ENVIADOS de bitácoras que le pertenecen ----
     @Query(
         """
-        SELECT r.* FROM registros r
-        INNER JOIN bitacoras b ON r.bitacoraId = b.id
-        WHERE b.id = :bitacoraId AND b.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO'
+        SELECT r.id AS id, r.bitacoraId AS bitacoraId, r.estudianteId AS estudianteId,
+               r.fechaClase AS fechaClase, r.contenido AS contenido, r.actividad AS actividad,
+               r.aprendizaje AS aprendizaje, r.dudas AS dudas, r.fotoUri AS fotoUri,
+               r.enlace AS enlace, r.estadoEnvio AS estadoEnvio,
+               r.fechaCreacion AS fechaCreacion, r.fechaEnvio AS fechaEnvio,
+               b.titulo AS bitacoraTitulo, u.nombre AS estudianteNombre,
+               COALESCE(t.comentario, '') AS comentarioDocente,
+               COALESCE(t.fecha, 0) AS fechaRetro,
+               CASE WHEN t.id IS NULL THEN 'PENDIENTE' ELSE 'REVISADO' END AS estadoRevision
+        FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN asignaciones a ON a.id = b.asignacionId
+        INNER JOIN usuarios u ON u.id = r.estudianteId
+        LEFT JOIN retroalimentaciones t ON t.registroId = r.id
+        WHERE b.id = :bitacoraId AND a.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO'
         ORDER BY r.fechaEnvio DESC
         """
     )
-    fun obtenerEnviadosParaDocente(bitacoraId: Int, docenteId: Int): Flow<List<Registro>>
+    fun obtenerEnviadosParaDocente(bitacoraId: Int, docenteId: Int): Flow<List<RegistroDetalle>>
 
     @Query(
         """
-        SELECT r.* FROM registros r
-        INNER JOIN bitacoras b ON r.bitacoraId = b.id
-        WHERE r.id = :id AND b.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO'
+        SELECT r.id AS id, r.bitacoraId AS bitacoraId, r.estudianteId AS estudianteId,
+               r.fechaClase AS fechaClase, r.contenido AS contenido, r.actividad AS actividad,
+               r.aprendizaje AS aprendizaje, r.dudas AS dudas, r.fotoUri AS fotoUri,
+               r.enlace AS enlace, r.estadoEnvio AS estadoEnvio,
+               r.fechaCreacion AS fechaCreacion, r.fechaEnvio AS fechaEnvio,
+               b.titulo AS bitacoraTitulo, u.nombre AS estudianteNombre,
+               COALESCE(t.comentario, '') AS comentarioDocente,
+               COALESCE(t.fecha, 0) AS fechaRetro,
+               CASE WHEN t.id IS NULL THEN 'PENDIENTE' ELSE 'REVISADO' END AS estadoRevision
+        FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN asignaciones a ON a.id = b.asignacionId
+        INNER JOIN usuarios u ON u.id = r.estudianteId
+        LEFT JOIN retroalimentaciones t ON t.registroId = r.id
+        WHERE r.id = :id AND a.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO'
         """
     )
-    suspend fun obtenerParaDocente(id: Int, docenteId: Int): Registro?
+    suspend fun obtenerParaDocente(id: Int, docenteId: Int): List<RegistroDetalle>
 
-    // Guarda la retroalimentación y marca el aporte como revisado
+    // Cuántos registros ENVIADOS de este docente tienen ese id (0 = no puede revisarlo)
     @Query(
         """
-        UPDATE registros
-        SET comentarioDocente = :comentario, estadoRevision = 'REVISADO',
-            fechaRetro = :fecha, docenteRevisorId = :docenteId
-        WHERE id = :id AND estadoEnvio = 'ENVIADO'
-          AND bitacoraId IN (SELECT id FROM bitacoras WHERE docenteId = :docenteId)
+        SELECT COUNT(*) FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN asignaciones a ON a.id = b.asignacionId
+        WHERE r.id = :id AND a.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO'
         """
     )
-    suspend fun revisar(id: Int, comentario: String, fecha: Long, docenteId: Int)
+    suspend fun contarRevisables(id: Int, docenteId: Int): Int
+
+    // Si el registro ya tenía retroalimentación, se actualiza el comentario
+    @Query(
+        """
+        UPDATE retroalimentaciones SET comentario = :comentario, fecha = :fecha, docenteId = :docenteId
+        WHERE registroId = :registroId
+        """
+    )
+    suspend fun actualizarRetroalimentacion(registroId: Int, comentario: String, fecha: Long, docenteId: Int)
+
+    @Query("SELECT COUNT(*) FROM retroalimentaciones WHERE registroId = :registroId")
+    suspend fun contarRetroalimentaciones(registroId: Int): Int
 }

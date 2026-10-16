@@ -1,19 +1,40 @@
 package cl.duoc.bitacora.model
 
 import androidx.room3.Entity
+import androidx.room3.ForeignKey
+import androidx.room3.Index
 import androidx.room3.PrimaryKey
 
-// Aporte de un estudiante después de una clase. Incluye la retroalimentación del docente
-// (comentario, fecha y revisor) para no crear otra tabla en este avance.
-// estudianteNombre y bitacoraTitulo se copian para poder mostrarlos sin hacer más consultas.
-@Entity(tableName = "registros")
+// Aporte de un estudiante después de una clase.
+// Ya NO copia el nombre del estudiante ni el título de la bitácora: guarda las claves
+// foráneas (bitacoraId, estudianteId) y los nombres se obtienen con un JOIN.
+// La retroalimentación del docente está en su propia tabla (Retroalimentacion).
+@Entity(
+    tableName = "registros",
+    foreignKeys = [
+        ForeignKey(
+            entity = Bitacora::class,
+            parentColumns = ["id"],
+            childColumns = ["bitacoraId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Usuario::class,
+            parentColumns = ["id"],
+            childColumns = ["estudianteId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["bitacoraId"]),
+        Index(value = ["estudianteId"])
+    ]
+)
 data class Registro(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val bitacoraId: Int,
-    val bitacoraTitulo: String,
     val estudianteId: Int,
-    val estudianteNombre: String,
     val fechaClase: String,
     val contenido: String,
     val actividad: String,
@@ -22,10 +43,6 @@ data class Registro(
     val fotoUri: String = "",
     val enlace: String = "",
     val estadoEnvio: String = EstadoEnvio.BORRADOR,
-    val estadoRevision: String = EstadoRevision.PENDIENTE,
     val fechaCreacion: Long,
-    val fechaEnvio: Long = 0L,
-    val comentarioDocente: String = "",
-    val docenteRevisorId: Int = 0,
-    val fechaRetro: Long = 0L
+    val fechaEnvio: Long = 0L
 )
