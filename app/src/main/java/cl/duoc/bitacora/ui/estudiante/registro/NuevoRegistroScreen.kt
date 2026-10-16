@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
@@ -34,9 +33,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.bitacora.ui.componentes.CampoFecha
 import cl.duoc.bitacora.ui.componentes.CampoFormulario
+import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.ui.componentes.SelectorEvidencia
+import cl.duoc.bitacora.util.anioActual
+import cl.duoc.bitacora.util.parsearFechaCalendario
 
 @Composable
 fun NuevoRegistroScreen(
@@ -45,6 +48,8 @@ fun NuevoRegistroScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    MensajeSesion(snackbarHostState)
 
     // Al guardar o enviar volvemos a la pantalla anterior
     LaunchedEffect(uiState.terminado) {
@@ -91,14 +96,17 @@ fun NuevoRegistroScreen(
                     }
                 }
 
-                CampoFormulario(
-                    valor = uiState.fechaClase,
-                    onValorChange = { viewModel.cambiarFecha(it) },
+                // La fecha de la clase se elige en el calendario (no se escribe).
+                // Los días futuros están bloqueados.
+                CampoFecha(
+                    textoMostrado = uiState.fechaClase,
                     etiqueta = "Fecha de la clase",
-                    icono = Icons.Filled.DateRange,
                     hayError = uiState.errorFecha,
-                    mensajeError = "Use el formato dd/mm/aaaa (fecha real, no futura)",
-                    placeholder = "dd/mm/aaaa"
+                    mensajeError = "Elija en el calendario la fecha de la clase (no puede ser futura)",
+                    onFechaElegida = { viewModel.elegirFecha(it) },
+                    fechaInicial = parsearFechaCalendario(uiState.fechaClase),
+                    bloquearFuturas = true,
+                    anios = 2025..maxOf(2025, anioActual())
                 )
 
                 CampoFormulario(

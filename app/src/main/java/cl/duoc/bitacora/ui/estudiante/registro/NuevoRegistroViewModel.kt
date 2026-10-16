@@ -8,10 +8,10 @@ import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.BitacoraRepository
 import cl.duoc.bitacora.data.RegistroRepository
 import cl.duoc.bitacora.model.EstadoEnvio
-import cl.duoc.bitacora.model.EstadoRevision
 import cl.duoc.bitacora.model.Registro
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.copiarImagenAlmacenamientoApp
+import cl.duoc.bitacora.util.formatearFechaCalendario
 import cl.duoc.bitacora.util.validarCampoObligatorio
 import cl.duoc.bitacora.util.validarEnlace
 import cl.duoc.bitacora.util.validarFechaClase
@@ -42,7 +42,12 @@ class NuevoRegistroViewModel(
 
     init {
         viewModelScope.launch {
-            cargarDatos()
+            try {
+                cargarDatos()
+            } catch (e: Exception) {
+                _uiState.update { it.copy(cargado = true, sinAcceso = true) }
+                Sesion.error("No se pudo cargar el formulario.")
+            }
         }
     }
 
@@ -53,14 +58,18 @@ class NuevoRegistroViewModel(
             _uiState.update { it.copy(cargado = true, sinAcceso = true) }
             return
         }
-        val bitacora = bitacoraRepository.obtenerPublicadaParaEstudiante(bitacoraId, estudiante.curso)
+        val bitacora = bitacoraRepository.obtenerPublicadaParaEstudiante(bitacoraId, estudiante.cursoId ?: 0)
         if (bitacora == null) {
             _uiState.update { it.copy(cargado = true, sinAcceso = true) }
             return
         }
+        // Las preguntas orientadoras están en su propia tabla: se muestran numeradas
+        val textoPreguntas = bitacoraRepository
+            .obtenerPreguntasUnaVez(bitacora.id)
+            .joinToString("\n") { "${it.orden}. ${it.texto}" }
 
         if (registroId != 0) {
-            val borrador = registroRepository.obtenerDeEstudiante(registroId, estudiante.id)
+            val borrador = registroRepository.obtenerCrudoDeEstudiante(registroId, estudiante.id)
             if (borrador == null || borrador.estadoEnvio != EstadoEnvio.BORRADOR) {
                 _uiState.update { it.copy(cargado = true, sinAcceso = true) }
                 return
@@ -70,7 +79,7 @@ class NuevoRegistroViewModel(
                 it.copy(
                     bitacoraTitulo = bitacora.titulo,
                     instrucciones = bitacora.instrucciones,
-                    preguntas = bitacora.preguntas,
+                    preguntas = textoPreguntas,
                     cargado = true,
                     fechaClase = borrador.fechaClase,
                     contenido = borrador.contenido,
@@ -86,16 +95,18 @@ class NuevoRegistroViewModel(
                 it.copy(
                     bitacoraTitulo = bitacora.titulo,
                     instrucciones = bitacora.instrucciones,
-                    preguntas = bitacora.preguntas,
+                    preguntas = textoPreguntas,
                     cargado = true
                 )
             }
         }
     }
 
-    fun cambiarFecha(valor: String) {
+    // La fecha se elige en el calendario (milisegundos UTC) y se guarda como "dd/MM/yyyy"
+    fun elegirFecha(millisUtc: Long) {
+        val texto = formatearFechaCalendario(millisUtc)
         _uiState.update {
-            it.copy(fechaClase = valor, errorFecha = it.errorFecha && !validarFechaClase(valor))
+            it.copy(fechaClase = texto, errorFecha = it.errorFecha && !validarFechaClase(texto))
         }
     }
 
@@ -204,41 +215,49 @@ class NuevoRegistroViewModel(
         val alumno = estudiante ?: return
 
         viewModelScope.launch {
-            // Se vuelve a comprobar que la bitácora siga activa (el docente pudo cerrarla)
-            val bitacora = bitacoraRepository.obtenerPublicadaParaEstudiante(bitacoraId, alumno.curso)
-            if (bitacora == null) {
-                _uiState.update { it.copy(sinAcceso = true) }
-                return@launch
+            // Si algo falla se muestra un mensaje de ERROR en vez de cerrar la app
+            try {
+                // Se vuelve a comprobar que la bitácora siga activa (el docente pudo cerrarla)
+                val bitacora = bitacoraRepository.obtenerPublicadaParaEstudiante(bitacoraId, alumno.cursoId ?: 0)
+                if (bitacora == null) {
+                    _uiState.update { it.copy(sinAcceso = true) }
+                    Sesion.error("La bitácora ya no está activa. No se guardó el registro.")
+                    return@launch
+                }
+
+                val ahora = System.currentTimeMillis()
+                val registro = Registro(
+                    id = registroId,
+                    bitacoraId = bitacora.id,
+                    estudianteId = alumno.id,
+                    fechaClase = estado.fechaClase.trim(),
+                    contenido = estado.contenido.trim(),
+                    actividad = estado.actividad.trim(),
+                    aprendizaje = estado.aprendizaje.trim(),
+                    dudas = estado.dudas.trim(),
+                    fotoUri = estado.fotoUri,
+                    enlace = estado.enlace.trim(),
+                    estadoEnvio = if (enviar) EstadoEnvio.ENVIADO else EstadoEnvio.BORRADOR,
+                    fechaCreacion = fechaCreacionOriginal,
+                    fechaEnvio = if (enviar) ahora else 0L
+                )
+
+                if (registroId == 0) {
+                    registroRepository.guardarNuevo(registro)
+                } else {
+                    registroRepository.actualizar(registro)
+                }
+
+                if (enviar) {
+                    Sesion.exito("Registro enviado a tu docente.")
+                } else {
+                    // Borrador = aviso (ámbar): todavía falta enviarlo
+                    Sesion.advertencia("Borrador guardado. Recuerda enviarlo a tu docente.")
+                }
+                _uiState.update { it.copy(terminado = true) }
+            } catch (e: Exception) {
+                Sesion.error("No se pudo guardar el registro. Intenta nuevamente.")
             }
-
-            val ahora = System.currentTimeMillis()
-            val registro = Registro(
-                id = registroId,
-                bitacoraId = bitacora.id,
-                bitacoraTitulo = bitacora.titulo,
-                estudianteId = alumno.id,
-                estudianteNombre = alumno.nombre,
-                fechaClase = estado.fechaClase.trim(),
-                contenido = estado.contenido.trim(),
-                actividad = estado.actividad.trim(),
-                aprendizaje = estado.aprendizaje.trim(),
-                dudas = estado.dudas.trim(),
-                fotoUri = estado.fotoUri,
-                enlace = estado.enlace.trim(),
-                estadoEnvio = if (enviar) EstadoEnvio.ENVIADO else EstadoEnvio.BORRADOR,
-                estadoRevision = EstadoRevision.PENDIENTE,
-                fechaCreacion = fechaCreacionOriginal,
-                fechaEnvio = if (enviar) ahora else 0L
-            )
-
-            if (registroId == 0) {
-                registroRepository.guardarNuevo(registro)
-            } else {
-                registroRepository.actualizar(registro)
-            }
-
-            Sesion.mensaje = if (enviar) "Registro enviado a tu docente." else "Borrador guardado."
-            _uiState.update { it.copy(terminado = true) }
         }
     }
 }

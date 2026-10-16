@@ -30,7 +30,8 @@ fun CampoFormulario(
     esPassword: Boolean = false,
     lineas: Int = 1,
     teclado: KeyboardType = KeyboardType.Text,
-    placeholder: String = ""
+    placeholder: String = "",
+    soloLectura: Boolean = false
 ) {
     OutlinedTextField(
         value = valor,
@@ -58,6 +59,7 @@ fun CampoFormulario(
         },
         visualTransformation = if (esPassword) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = KeyboardOptions(keyboardType = teclado),
+        readOnly = soloLectura,
         singleLine = lineas == 1,
         minLines = lineas,
         modifier = modifier.fillMaxWidth()
