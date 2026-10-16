@@ -19,6 +19,21 @@ val ColorRevisado = Color(0xFFA5D6A7)    // verde: revisado
 val ColorPublicada = Color(0xFF4FC3F7)   // celeste intenso: bitácora activa / registro enviado
 val ColorCerrada = Color(0xFFBDBDBD)     // gris oscuro: bitácora cerrada
 
+// Colores SEMÁNTICOS centralizados (todos los mensajes y estados de la app salen de aquí):
+//   éxito = verde · advertencia = ámbar · error = rojo
+// Versión fuerte (fondo de mensajes Snackbar con texto blanco)
+val ColorExito = Color(0xFF2E7D32)
+val ColorAdvertencia = Color(0xFFF9A825)
+val ColorError = Color(0xFFC62828)
+// Versión suave (etiquetas de estado, con texto oscuro)
+val ColorExitoSuave = ColorRevisado
+val ColorAdvertenciaSuave = ColorPendiente
+val ColorErrorSuave = Color(0xFFEF9A9A)
+// Color del texto sobre cada fondo semántico
+val TextoSobreExito = Color(0xFFFFFFFF)
+val TextoSobreError = Color(0xFFFFFFFF)
+val TextoSobreAdvertencia = Color(0xFF1B1B1B)
+
 // Fondo de tarjetas en modo claro (reemplaza el lila por defecto de Material 3)
 val AzulTarjeta = Color(0xFFD3E0FA)
 

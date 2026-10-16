@@ -46,6 +46,7 @@ fun EstudianteInicioScreen(
     viewModel: EstudianteInicioViewModel = viewModel()
 ) {
     val bitacoras by viewModel.bitacoras.collectAsStateWithLifecycle()
+    val nombreCurso by viewModel.nombreCurso.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     MensajeSesion(snackbarHostState)
@@ -71,7 +72,7 @@ fun EstudianteInicioScreen(
             item {
                 TarjetaBienvenida(
                     nombre = Sesion.usuario?.nombre ?: "",
-                    detalle = "Curso: ${Sesion.usuario?.curso ?: ""}",
+                    detalle = "Curso: $nombreCurso",
                     icono = Icons.Filled.Face
                 )
             }

@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.dp
 import cl.duoc.bitacora.model.EstadoBitacora
 import cl.duoc.bitacora.model.EstadoEnvio
 import cl.duoc.bitacora.model.EstadoRevision
-import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.data.RegistroDetalle
+import cl.duoc.bitacora.ui.theme.ColorAdvertenciaSuave
 import cl.duoc.bitacora.ui.theme.ColorBorrador
 import cl.duoc.bitacora.ui.theme.ColorCerrada
-import cl.duoc.bitacora.ui.theme.ColorPendiente
+import cl.duoc.bitacora.ui.theme.ColorExitoSuave
 import cl.duoc.bitacora.ui.theme.ColorPublicada
-import cl.duoc.bitacora.ui.theme.ColorRevisado
 
 // Etiqueta de color. Si el estado cambia, el color cambia con una animación (animateColorAsState).
 @Composable
@@ -57,16 +57,16 @@ fun EtiquetaBitacora(estado: String) {
 
 // Etiquetas de un registro: borrador / enviado + pendiente / revisado
 @Composable
-fun EtiquetasRegistro(registro: Registro) {
+fun EtiquetasRegistro(registro: RegistroDetalle) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (registro.estadoEnvio == EstadoEnvio.BORRADOR) {
             EtiquetaEstado("Borrador", ColorBorrador)
         } else {
             EtiquetaEstado("Enviado", ColorPublicada)
             if (registro.estadoRevision == EstadoRevision.REVISADO) {
-                EtiquetaEstado("Revisado", ColorRevisado)
+                EtiquetaEstado("Revisado", ColorExitoSuave)
             } else {
-                EtiquetaEstado("Pendiente de revisión", ColorPendiente)
+                EtiquetaEstado("Pendiente de revisión", ColorAdvertenciaSuave)
             }
         }
     }

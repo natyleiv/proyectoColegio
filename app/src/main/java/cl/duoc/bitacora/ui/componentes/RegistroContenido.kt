@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.data.RegistroDetalle
 import cl.duoc.bitacora.util.formatearFecha
 import coil3.compose.AsyncImage
 
 // Muestra el contenido de un registro (solo lectura). Lo usan el docente y el estudiante.
 @Composable
-fun RegistroContenido(registro: Registro) {
+fun RegistroContenido(registro: RegistroDetalle) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = registro.bitacoraTitulo,

@@ -20,7 +20,7 @@ class LoginViewModel(
 ) : AndroidViewModel(application) {
 
     private val database = AppDatabase.getInstance(application)
-    private val repository = UsuarioRepository(database.usuarioDao(), database.asignacionDao())
+    private val repository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -28,7 +28,11 @@ class LoginViewModel(
     init {
         // Primera ejecución: carga usuarios y bitácoras ficticias de prueba
         viewModelScope.launch {
-            cargarDatosDemo(database)
+            try {
+                cargarDatosDemo(database)
+            } catch (e: Exception) {
+                Sesion.error("No se pudieron cargar los datos de prueba.")
+            }
         }
     }
 
@@ -68,16 +72,20 @@ class LoginViewModel(
 
         if (!errorCorreo && !errorPassword) {
             viewModelScope.launch {
-                val usuario = repository.iniciarSesion(estado.correo, estado.password)
-                if (usuario == null) {
-                    _uiState.update { estadoActual ->
-                        estadoActual.copy(errorCredenciales = true)
+                try {
+                    val usuario = repository.iniciarSesion(estado.correo, estado.password)
+                    if (usuario == null) {
+                        _uiState.update { estadoActual ->
+                            estadoActual.copy(errorCredenciales = true)
+                        }
+                    } else {
+                        Sesion.usuario = usuario
+                        _uiState.update { estadoActual ->
+                            estadoActual.copy(perfilIngresado = usuario.perfil)
+                        }
                     }
-                } else {
-                    Sesion.usuario = usuario
-                    _uiState.update { estadoActual ->
-                        estadoActual.copy(perfilIngresado = usuario.perfil)
-                    }
+                } catch (e: Exception) {
+                    Sesion.error("Error al iniciar sesión. Intenta nuevamente.")
                 }
             }
         }

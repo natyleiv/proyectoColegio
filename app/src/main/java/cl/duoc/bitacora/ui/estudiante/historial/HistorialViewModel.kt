@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.RegistroRepository
-import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.data.RegistroDetalle
 import cl.duoc.bitacora.util.Sesion
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +19,7 @@ class HistorialViewModel(
     private val repository = RegistroRepository(database.registroDao())
 
     // Solo los registros del estudiante que inició sesión (nunca los de sus compañeros)
-    val registros: StateFlow<List<Registro>> =
+    val registros: StateFlow<List<RegistroDetalle>> =
         repository
             .obtenerPorEstudiante(Sesion.usuario?.id ?: 0)
             .stateIn(

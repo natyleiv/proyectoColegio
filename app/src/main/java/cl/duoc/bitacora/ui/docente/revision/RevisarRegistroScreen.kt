@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.bitacora.ui.componentes.CampoFormulario
+import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.ui.componentes.RegistroContenido
 
@@ -31,6 +32,8 @@ fun RevisarRegistroScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    MensajeSesion(snackbarHostState)
 
     LaunchedEffect(uiState.guardado) {
         if (uiState.guardado) onVolver()

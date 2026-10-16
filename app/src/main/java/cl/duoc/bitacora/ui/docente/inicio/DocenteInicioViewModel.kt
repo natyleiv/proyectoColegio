@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.BitacoraRepository
 import cl.duoc.bitacora.data.UsuarioRepository
-import cl.duoc.bitacora.model.Asignacion
-import cl.duoc.bitacora.model.Bitacora
+import cl.duoc.bitacora.data.AsignacionDetalle
+import cl.duoc.bitacora.data.BitacoraDetalle
 import cl.duoc.bitacora.util.Sesion
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,12 +19,12 @@ class DocenteInicioViewModel(
 
     private val database = AppDatabase.getInstance(application)
     private val bitacoraRepository = BitacoraRepository(database.bitacoraDao())
-    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao())
+    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
 
     // Solo se consulta lo que pertenece al docente que inició sesión
     private val docenteId = Sesion.usuario?.id ?: 0
 
-    val bitacoras: StateFlow<List<Bitacora>> =
+    val bitacoras: StateFlow<List<BitacoraDetalle>> =
         bitacoraRepository
             .obtenerPorDocente(docenteId)
             .stateIn(
@@ -33,7 +33,7 @@ class DocenteInicioViewModel(
                 initialValue = emptyList()
             )
 
-    val asignaciones: StateFlow<List<Asignacion>> =
+    val asignaciones: StateFlow<List<AsignacionDetalle>> =
         usuarioRepository
             .obtenerAsignaciones(docenteId)
             .stateIn(

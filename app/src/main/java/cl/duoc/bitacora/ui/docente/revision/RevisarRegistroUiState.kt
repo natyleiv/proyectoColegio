@@ -1,9 +1,9 @@
 package cl.duoc.bitacora.ui.docente.revision
 
-import cl.duoc.bitacora.model.Registro
+import cl.duoc.bitacora.data.RegistroDetalle
 
 data class RevisarRegistroUiState(
-    val registro: Registro? = null,
+    val registro: RegistroDetalle? = null,
     val cargado: Boolean = false,
     val comentario: String = "",
     val errorComentario: Boolean = false,
