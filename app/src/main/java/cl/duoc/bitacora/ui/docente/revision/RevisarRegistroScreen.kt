@@ -24,6 +24,7 @@ import cl.duoc.bitacora.ui.componentes.CampoFormulario
 import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.ui.componentes.RegistroContenido
+import cl.duoc.bitacora.model.EstadoRevision
 
 @Composable
 fun RevisarRegistroScreen(
@@ -70,11 +71,15 @@ fun RevisarRegistroScreen(
                     lineas = 3
                 )
 
+                // El texto del botón depende de si el aporte ya fue revisado antes
                 Button(
                     onClick = { viewModel.guardarRevision() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Guardar comentario y marcar como revisado")
+                    Text(
+                        if (registro.estadoRevision == EstadoRevision.REVISADO) "Actualizar comentario"
+                        else "Guardar comentario y marcar como revisado"
+                    )
                 }
             }
         }
