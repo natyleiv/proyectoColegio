@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import cl.duoc.bitacora.util.formatearFechaCalendario
 
 class DetalleBitacoraViewModel(
     application: Application
@@ -61,33 +62,43 @@ class DetalleBitacoraViewModel(
     private val filtroEstado = MutableStateFlow(FILTRO_TODOS)
     private val busqueda = MutableStateFlow("")
 
-    // Une las 4 fuentes (registros, estudiantes, filtro y búsqueda) en un solo estado
+    private val fechaFiltro = MutableStateFlow("")      // "" = sin filtro de fecha
+
+    // Une las 5 fuentes (registros, estudiantes, estado, nombre y fecha) en un solo estado
     val uiState: StateFlow<DetalleBitacoraUiState> =
-        combine(registros, estudiantes, filtroEstado, busqueda) { regs, ests, filtro, texto ->
+        combine(registros, estudiantes, filtroEstado, busqueda, fechaFiltro) { regs, ests, filtro, texto, fecha ->
             val idsQueParticiparon = regs.map { it.estudianteId }.toSet()
             val sinParticipar = ests
                 .filter { it.id !in idsQueParticiparon }
                 .map { it.nombre }
 
+            // 1) Filtro por estado (chips)
             val porEstado = when (filtro) {
                 FILTRO_PENDIENTES -> regs.filter { it.estadoRevision == EstadoRevision.PENDIENTE }
                 FILTRO_REVISADOS -> regs.filter { it.estadoRevision == EstadoRevision.REVISADO }
                 else -> regs
             }
+
+            // 2) Filtro por nombre del estudiante (texto)
             val textoLimpio = texto.trim()
-            val filtrados = if (textoLimpio.isEmpty()) {
+            val porNombre = if (textoLimpio.isEmpty()) {
                 porEstado
             } else {
-                porEstado.filter {
-                    it.estudianteNombre.contains(textoLimpio, ignoreCase = true) ||
-                            it.fechaClase.contains(textoLimpio)
-                }
+                porEstado.filter { it.estudianteNombre.contains(textoLimpio, ignoreCase = true) }
+            }
+
+            // 3) Filtro por fecha de la clase (calendario): debe ser exactamente la fecha elegida
+            val filtrados = if (fecha.isEmpty()) {
+                porNombre
+            } else {
+                porNombre.filter { it.fechaClase == fecha }
             }
 
             DetalleBitacoraUiState(
                 registros = filtrados,
                 filtroEstado = filtro,
                 busqueda = texto,
+                fechaFiltro = fecha,
                 totalEstudiantes = ests.size,
                 participaron = idsQueParticiparon.size,
                 sinParticipacion = sinParticipar,
@@ -107,6 +118,15 @@ class DetalleBitacoraViewModel(
 
     fun cambiarBusqueda(texto: String) {
         busqueda.update { texto }
+    }
+
+    // El calendario entrega milisegundos; se guarda como "dd/MM/yyyy" (igual que fechaClase)
+    fun elegirFechaFiltro(millisUtc: Long) {
+        fechaFiltro.update { formatearFechaCalendario(millisUtc) }
+    }
+
+    fun quitarFechaFiltro() {
+        fechaFiltro.update { "" }
     }
 
     fun publicar() {

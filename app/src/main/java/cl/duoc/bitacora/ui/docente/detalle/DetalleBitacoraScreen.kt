@@ -47,6 +47,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import cl.duoc.bitacora.ui.componentes.EstadoVacio
 import cl.duoc.bitacora.ui.componentes.TituloSeccion
+import cl.duoc.bitacora.ui.componentes.CampoFecha
+import cl.duoc.bitacora.util.parsearFechaCalendario
+import androidx.compose.material.icons.filled.Close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -207,15 +210,41 @@ fun DetalleBitacoraScreen(
                         icono = Icons.Filled.Inbox
                     )
                 }
+                // Búsqueda por nombre del estudiante
                 item {
                     OutlinedTextField(
                         value = uiState.busqueda,
                         onValueChange = { viewModel.cambiarBusqueda(it) },
-                        label = { Text("Buscar por estudiante o fecha (dd/mm/aaaa)") },
+                        label = { Text("Buscar por estudiante") },
                         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                // Filtro por fecha de la clase: se elige en el calendario (no se escribe a mano)
+                item {
+                    CampoFecha(
+                        textoMostrado = uiState.fechaFiltro,
+                        etiqueta = "Filtrar por fecha de clase",
+                        hayError = false,
+                        mensajeError = "",
+                        onFechaElegida = { viewModel.elegirFechaFiltro(it) },
+                        fechaInicial = parsearFechaCalendario(uiState.fechaFiltro),
+                        bloquearFuturas = true
+                    )
+                }
+                // Botón para quitar el filtro de fecha (solo aparece si hay una fecha elegida)
+                if (uiState.fechaFiltro.isNotEmpty()) {
+                    item {
+                        OutlinedButton(
+                            onClick = { viewModel.quitarFechaFiltro() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Filled.Close, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Quitar filtro de fecha (${uiState.fechaFiltro})")
+                        }
+                    }
                 }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -238,7 +267,12 @@ fun DetalleBitacoraScreen(
                 }
 
                 if (uiState.registros.isEmpty()) {
-                    item { Text("No hay aportes que coincidan.") }
+                    item {
+                        EstadoVacio(
+                            texto = "No hay aportes que coincidan con los filtros.",
+                            icono = Icons.Filled.Search
+                        )
+                    }
                 }
                 items(uiState.registros) { registro ->
                     Card(

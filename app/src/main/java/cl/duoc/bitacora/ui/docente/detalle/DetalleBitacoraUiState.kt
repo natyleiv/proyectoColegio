@@ -11,6 +11,8 @@ data class DetalleBitacoraUiState(
     val registros: List<RegistroDetalle> = emptyList(),
     val filtroEstado: String = FILTRO_TODOS,
     val busqueda: String = "",
+    // Fecha elegida en el calendario para filtrar ("" = sin filtro de fecha)
+    val fechaFiltro: String = "",
 
     // Indicadores de participación
     val totalEstudiantes: Int = 0,
