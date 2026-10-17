@@ -6,6 +6,14 @@ Proyecto de la **Evaluación Parcial 2** de *DSY1105 – Desarrollo de Aplicacio
 
 > Todo el contenido (usuarios, cursos, bitácoras y registros) es **ficticio**. No se usan datos reales de estudiantes.
 
+## Integrantes
+
+- Natalia Millaray Leiva Millaqueo
+- Juan Pablo Marambio Zagal
+
+- **Equipo:** 1
+- **Planificación en Trello:** _(enlace pendiente)_
+
 ## Problema que resuelve
 
 Los estudiantes registran lo aprendido en cuadernos, guías y fotos sueltas, y el docente no tiene un lugar
@@ -19,13 +27,14 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 - Crear bitácora mensual (curso, asignatura, mes y año elegidos en un **calendario**, título, propósito, instrucciones y preguntas orientadoras).
 - **Editar** una bitácora mientras está en borrador (formulario con los datos cargados).
 - Publicar y cerrar una bitácora.
-- Ver los aportes enviados, con filtros por estado (todos, pendientes, revisados) y búsqueda por estudiante o fecha.
+- Ver los aportes enviados, con filtros por estado (todos, pendientes, revisados), búsqueda por nombre del estudiante y filtro por fecha de clase elegida en un **calendario**.
+- Al abrir un aporte ya revisado, el botón cambia a **"Actualizar comentario"**.
 - Ver indicadores de participación (participaron / total, sin participación, aportes revisados y pendientes).
 - Revisar un aporte (texto, foto y enlace), escribir retroalimentación y marcarlo como revisado.
 
 **Estudiante**
 - Inicio de sesión con cuenta ficticia y consulta de las bitácoras activas de su curso.
-- Crear un registro de clase (fecha elegida en un **calendario** —los días futuros están bloqueados—, contenido, actividad, aprendizaje, dudas y enlace).
+- Crear un registro de clase (fecha elegida en un **calendario** —los días futuros están bloqueados y la fecha debe pertenecer al mes de la bitácora—, contenido, actividad, aprendizaje, dudas y enlace).
 - Guardar como **borrador** y seguir editándolo, o **enviar** al docente.
 - Adjuntar una foto desde la **galería** (Photo Picker) o con la **cámara**.
 - Consultar su historial, el estado de cada aporte (borrador / enviado / pendiente / revisado) y la retroalimentación.
@@ -48,7 +57,7 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 | Interfaz organizada y navegación clara | `ui/navegacion/Navegacion.kt`, `ui/componentes/PantallaBase.kt` (Scaffold + TopAppBar) |
 | Formularios validados con íconos y mensajes | `ui/componentes/CampoFormulario.kt`; formularios: login, nueva bitácora, registro de clase, retroalimentación |
 | Validaciones desde la lógica | `util/Validaciones.kt` llamadas desde los `ViewModel` |
-| Animaciones funcionales | `AnimatedVisibility`, `animateColorAsState`, `animateFloatAsState` (ver `LoginScreen`, `EtiquetaEstado`, `SelectorEvidencia`, `DetalleBitacoraScreen`) |
+| Animaciones funcionales | `AnimatedVisibility`, `Crossfade`, `animateColorAsState`, `animateFloatAsState` (ver `CampoFormulario`, `SelectorEvidencia`, `EtiquetaEstado`, `LoginScreen`, `DetalleBitacoraScreen`) |
 | Estructura modular, MVVM y persistencia local | paquetes `model`, `data` (Room), `ui`, `util`; cada pantalla con `Screen`, `ViewModel` y `UiState` |
 | Dos recursos nativos | Photo Picker (galería) y cámara con `FileProvider` (`ui/componentes/SelectorEvidencia.kt`, `util/ImagenUtils.kt`) |
 | Modelo de datos relacional con claves primarias, foráneas y relaciones | 8 tablas normalizadas (3FN), ver sección siguiente; `model/` y `data/AppDatabase.kt` |
@@ -112,8 +121,7 @@ app/src/main/java/cl/duoc/bitacora/
 ## Cómo ejecutar
 
 1. Clonar el repositorio y abrirlo en **Android Studio**.
-2. Si faltan `gradlew`, `gradlew.bat` y `gradle/wrapper/gradle-wrapper.jar`, copiarlos desde cualquier proyecto
-   *Empty Activity* generado por Android Studio y luego hacer **Sync Project with Gradle Files**.
+2. Esperar a que termine **Sync Project with Gradle Files**.
 3. Crear un dispositivo virtual: **Pixel 8, API 36 (Android 16)**.
 4. Ejecutar la app (`Run 'app'`).
 5. Ingresar con una cuenta de prueba (se cargan solas en la primera ejecución):
