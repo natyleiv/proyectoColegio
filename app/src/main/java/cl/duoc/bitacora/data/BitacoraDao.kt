@@ -153,4 +153,15 @@ interface BitacoraDao {
     // Al editar se reemplazan las preguntas (se borran y se vuelven a crear)
     @Query("DELETE FROM preguntas_orientadoras WHERE bitacoraId = :bitacoraId")
     suspend fun borrarPreguntas(bitacoraId: Int)
+
+
+    // Cuenta bitácoras de la misma asignación (curso + asignatura), mes y año.
+    // idExcluir: al EDITAR se excluye la propia bitácora (al crear se pasa 0).
+    @Query(
+        """
+        SELECT COUNT(*) FROM bitacoras
+        WHERE asignacionId = :asignacionId AND mes = :mes AND anio = :anio AND id != :idExcluir
+        """
+    )
+    suspend fun contarDuplicadas(asignacionId: Int, mes: Int, anio: Int, idExcluir: Int): Int
 }

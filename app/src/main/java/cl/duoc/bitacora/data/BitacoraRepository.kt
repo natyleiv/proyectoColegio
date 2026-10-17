@@ -68,4 +68,9 @@ class BitacoraRepository(private val bitacoraDao: BitacoraDao) {
     suspend fun obtenerPreguntasUnaVez(bitacoraId: Int): List<PreguntaOrientadora> {
         return bitacoraDao.obtenerPreguntasUnaVez(bitacoraId)
     }
+
+    // true si ya existe OTRA bitácora del mismo curso, asignatura, mes y año
+    suspend fun existeDuplicada(asignacionId: Int, mes: Int, anio: Int, idExcluir: Int): Boolean {
+        return bitacoraDao.contarDuplicadas(asignacionId, mes, anio, idExcluir) > 0
+    }
 }

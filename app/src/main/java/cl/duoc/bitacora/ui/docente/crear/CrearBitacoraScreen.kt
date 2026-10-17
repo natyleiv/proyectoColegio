@@ -99,8 +99,12 @@ fun CrearBitacoraScreen(
                     "${nombreMes(uiState.mes.toInt())} ${uiState.anio}"
                 } else "",
                 etiqueta = "Mes y año de la bitácora",
-                hayError = uiState.errorMes || uiState.errorAnio,
-                mensajeError = "Elija el mes y año en el calendario",
+                hayError = uiState.errorMes || uiState.errorAnio || uiState.errorDuplicada,
+                mensajeError = if (uiState.errorDuplicada) {
+                    "Ya existe una bitácora de este mes para el curso y asignatura elegidos"
+                } else {
+                    "Elija el mes y año en el calendario"
+                },
                 onFechaElegida = { viewModel.elegirMesAnio(it) },
                 fechaInicial = if (fechaValida) {
                     primerDiaParaCalendario(uiState.mes.toInt(), uiState.anio.toInt())

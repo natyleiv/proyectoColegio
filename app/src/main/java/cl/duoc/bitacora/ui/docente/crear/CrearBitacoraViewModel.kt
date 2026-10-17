@@ -93,7 +93,8 @@ class CrearBitacoraViewModel(
         _uiState.update {
             it.copy(
                 asignacionId = id,
-                errorAsignacion = it.errorAsignacion && !validarAsignacionSeleccionada(id)
+                errorAsignacion = it.errorAsignacion && !validarAsignacionSeleccionada(id),
+                errorDuplicada = false
             )
         }
     }
@@ -131,7 +132,8 @@ class CrearBitacoraViewModel(
                 mes = mesElegido.toString(),
                 anio = anioElegido.toString(),
                 errorMes = false,
-                errorAnio = false
+                errorAnio = false,
+                errorDuplicada = false
             )
         }
     }
@@ -185,6 +187,19 @@ class CrearBitacoraViewModel(
             viewModelScope.launch {
                 // Si falla la base de datos se muestra un mensaje de ERROR (no se cierra la app)
                 try {
+                    // Regla de negocio: una sola bitácora por curso, asignatura, mes y año
+                    val idExcluir = if (modoEdicion) bitacoraEditadaId else 0
+                    val duplicada = bitacoraRepository.existeDuplicada(
+                        asignacion.id,
+                        estado.mes.trim().toInt(),
+                        estado.anio.trim().toInt(),
+                        idExcluir
+                    )
+                    if (duplicada) {
+                        _uiState.update { it.copy(errorDuplicada = true) }
+                        return@launch
+                    }
+
                     if (modoEdicion) {
                         bitacoraRepository.editar(
                             id = bitacoraEditadaId,

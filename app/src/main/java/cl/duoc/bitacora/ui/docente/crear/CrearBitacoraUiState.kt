@@ -20,6 +20,8 @@ data class CrearBitacoraUiState(
     val errorPreguntas: Boolean = false,
     val errorMes: Boolean = false,
     val errorAnio: Boolean = false,
+    // Ya existe una bitácora de ese curso, asignatura, mes y año
+    val errorDuplicada: Boolean = false,
 
     // Cuando es true la pantalla vuelve atrás
     val guardada: Boolean = false
