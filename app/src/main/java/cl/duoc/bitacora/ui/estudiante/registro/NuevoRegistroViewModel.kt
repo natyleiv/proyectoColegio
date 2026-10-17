@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import cl.duoc.bitacora.util.nombreMes
+import cl.duoc.bitacora.util.validarFechaEnMes
 
 class NuevoRegistroViewModel(
     application: Application
@@ -36,6 +38,10 @@ class NuevoRegistroViewModel(
     private val registroId = Sesion.registroId     // 0 = registro nuevo; otro = editar borrador
 
     private var fechaCreacionOriginal = System.currentTimeMillis()
+
+    // Mes y año de la bitácora (se cargan en cargarDatos) para validar la fecha de la clase
+    private var mesBitacora = 0
+    private var anioBitacora = 0
 
     private val _uiState = MutableStateFlow(NuevoRegistroUiState())
     val uiState: StateFlow<NuevoRegistroUiState> = _uiState.asStateFlow()
@@ -63,6 +69,10 @@ class NuevoRegistroViewModel(
             _uiState.update { it.copy(cargado = true, sinAcceso = true) }
             return
         }
+        mesBitacora = bitacora.mes
+        anioBitacora = bitacora.anio
+        _uiState.update { it.copy(mesBitacoraTexto = "${nombreMes(bitacora.mes)} ${bitacora.anio}") }
+
         // Las preguntas orientadoras están en su propia tabla: se muestran numeradas
         val textoPreguntas = bitacoraRepository
             .obtenerPreguntasUnaVez(bitacora.id)
@@ -102,11 +112,16 @@ class NuevoRegistroViewModel(
         }
     }
 
+    // La fecha es válida si tiene buen formato, no es futura Y es del mes de la bitácora
+    private fun fechaValida(fecha: String): Boolean {
+        return validarFechaClase(fecha) && validarFechaEnMes(fecha, mesBitacora, anioBitacora)
+    }
+
     // La fecha se elige en el calendario (milisegundos UTC) y se guarda como "dd/MM/yyyy"
     fun elegirFecha(millisUtc: Long) {
         val texto = formatearFechaCalendario(millisUtc)
         _uiState.update {
-            it.copy(fechaClase = texto, errorFecha = it.errorFecha && !validarFechaClase(texto))
+            it.copy(fechaClase = texto, errorFecha = it.errorFecha && !fechaValida(texto))
         }
     }
 
@@ -166,7 +181,7 @@ class NuevoRegistroViewModel(
     // Borrador: se exige solo fecha válida y contenido, para poder guardar a medias
     fun guardarBorrador() {
         val estado = _uiState.value
-        val errorFecha = !validarFechaClase(estado.fechaClase)
+        val errorFecha = !fechaValida(estado.fechaClase)
         val errorContenido = !validarCampoObligatorio(estado.contenido)
         val errorEnlace = !validarEnlace(estado.enlace)
 
@@ -182,7 +197,7 @@ class NuevoRegistroViewModel(
     // Enviar: todos los campos obligatorios deben ser válidos
     fun enviar() {
         val estado = _uiState.value
-        val errorFecha = !validarFechaClase(estado.fechaClase)
+        val errorFecha = !fechaValida(estado.fechaClase)
         val errorContenido = !validarCampoObligatorio(estado.contenido)
         val errorActividad = !validarCampoObligatorio(estado.actividad)
         val errorAprendizaje = !validarCampoObligatorio(estado.aprendizaje)

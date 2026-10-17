@@ -5,6 +5,8 @@ data class NuevoRegistroUiState(
     val bitacoraTitulo: String = "",
     val instrucciones: String = "",
     val preguntas: String = "",
+    // Mes de la bitácora en texto (ej: "Octubre 2026"), para el mensaje de error de la fecha
+    val mesBitacoraTexto: String = "",
     val cargado: Boolean = false,
     val sinAcceso: Boolean = false,
 

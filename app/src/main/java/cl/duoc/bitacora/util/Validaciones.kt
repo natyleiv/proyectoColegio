@@ -59,3 +59,13 @@ fun validarEnlace(enlace: String): Boolean {
             enlace.startsWith("http://") ||
             enlace.startsWith("https://")
 }
+
+// Regla de negocio: la fecha de la clase (dd/MM/yyyy) debe ser del mes y año de la bitácora
+fun validarFechaEnMes(fecha: String, mes: Int, anio: Int): Boolean {
+    if (fecha.length != 10) return false
+    val partes = fecha.split("/")          // "05/10/2026" -> ["05", "10", "2026"]
+    if (partes.size != 3) return false
+    val mesFecha = partes[1].toIntOrNull()
+    val anioFecha = partes[2].toIntOrNull()
+    return mesFecha == mes && anioFecha == anio
+}

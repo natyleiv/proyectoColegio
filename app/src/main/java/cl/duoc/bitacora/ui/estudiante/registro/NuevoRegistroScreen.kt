@@ -102,7 +102,7 @@ fun NuevoRegistroScreen(
                     textoMostrado = uiState.fechaClase,
                     etiqueta = "Fecha de la clase",
                     hayError = uiState.errorFecha,
-                    mensajeError = "Elija en el calendario la fecha de la clase (no puede ser futura)",
+                    mensajeError = "Elija un día de ${uiState.mesBitacoraTexto}, hasta la fecha de hoy",
                     onFechaElegida = { viewModel.elegirFecha(it) },
                     fechaInicial = parsearFechaCalendario(uiState.fechaClase),
                     bloquearFuturas = true,
