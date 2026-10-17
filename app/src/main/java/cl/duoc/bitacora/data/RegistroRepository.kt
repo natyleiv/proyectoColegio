@@ -56,4 +56,8 @@ class RegistroRepository(private val registroDao: RegistroDao) {
             registroDao.actualizarRetroalimentacion(registroId, comentario, ahora, docenteId)
         }
     }
+
+    fun contarPendientesDeDocente(docenteId: Int): Flow<Int> {
+        return registroDao.contarPendientesDeDocente(docenteId)
+    }
 }

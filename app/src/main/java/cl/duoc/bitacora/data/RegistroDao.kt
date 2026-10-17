@@ -132,4 +132,16 @@ interface RegistroDao {
 
     @Query("SELECT COUNT(*) FROM retroalimentaciones WHERE registroId = :registroId")
     suspend fun contarRetroalimentaciones(registroId: Int): Int
+
+    // Aportes ENVIADOS sin retroalimentación, en TODAS las bitácoras del docente (para el resumen del inicio)
+    @Query(
+        """
+        SELECT COUNT(*) FROM registros r
+        INNER JOIN bitacoras b ON b.id = r.bitacoraId
+        INNER JOIN asignaciones a ON a.id = b.asignacionId
+        LEFT JOIN retroalimentaciones t ON t.registroId = r.id
+        WHERE a.docenteId = :docenteId AND r.estadoEnvio = 'ENVIADO' AND t.id IS NULL
+        """
+    )
+    fun contarPendientesDeDocente(docenteId: Int): Flow<Int>
 }

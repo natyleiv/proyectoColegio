@@ -118,3 +118,27 @@ fun EstadoVacio(
         )
     }
 }
+
+// Un número destacado con su etiqueta debajo (para tarjetas de resumen)
+@Composable
+fun IndicadorResumen(
+    valor: Int,
+    etiqueta: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = valor.toString(),
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = etiqueta,
+            style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center
+        )
+    }
+}

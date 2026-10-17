@@ -41,7 +41,9 @@ import androidx.compose.ui.Alignment
 import cl.duoc.bitacora.ui.componentes.EstadoVacio
 import cl.duoc.bitacora.ui.componentes.TarjetaBienvenida
 import cl.duoc.bitacora.ui.componentes.TituloSeccion
-
+import androidx.compose.material.icons.filled.BarChart
+import cl.duoc.bitacora.model.EstadoBitacora
+import cl.duoc.bitacora.ui.componentes.IndicadorResumen
 
 @Composable
 fun DocenteInicioScreen(
@@ -52,6 +54,7 @@ fun DocenteInicioScreen(
 ) {
     val bitacoras by viewModel.bitacoras.collectAsStateWithLifecycle()
     val asignaciones by viewModel.asignaciones.collectAsStateWithLifecycle()
+    val pendientes by viewModel.pendientes.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     MensajeSesion(snackbarHostState)
@@ -89,6 +92,39 @@ fun DocenteInicioScreen(
                 )
             }
 
+
+            // Resumen (dashboard): estado general de las bitácoras del docente
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TituloSeccion(
+                            texto = "Resumen",
+                            icono = Icons.Filled.BarChart
+                        )
+                        // weight(1f): las tres columnas ocupan el mismo ancho (PPT 02)
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            IndicadorResumen(
+                                valor = bitacoras.count { it.estado == EstadoBitacora.PUBLICADA },
+                                etiqueta = "Activas",
+                                modifier = Modifier.weight(1f)
+                            )
+                            IndicadorResumen(
+                                valor = bitacoras.count { it.estado == EstadoBitacora.BORRADOR },
+                                etiqueta = "Borradores",
+                                modifier = Modifier.weight(1f)
+                            )
+                            IndicadorResumen(
+                                valor = pendientes,
+                                etiqueta = "Aportes por revisar",
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
             // Cursos y asignaturas asignadas al docente
             item {
                 TituloSeccion(
