@@ -11,9 +11,6 @@ Proyecto de la **Evaluación Parcial 2** de *DSY1105 – Desarrollo de Aplicacio
 - Natalia Millaray Leiva Millaqueo
 - Juan Pablo Marambio Zagal
 
-- **Equipo:** 1
-- **Planificación en Trello:** _(enlace pendiente)_
-
 ## Problema que resuelve
 
 Los estudiantes registran lo aprendido en cuadernos, guías y fotos sueltas, y el docente no tiene un lugar
