@@ -12,6 +12,7 @@ import cl.duoc.bitacora.model.Registro
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.copiarImagenAlmacenamientoApp
 import cl.duoc.bitacora.util.formatearFechaCalendario
+import cl.duoc.bitacora.util.mostrarNotificacion
 import cl.duoc.bitacora.util.validarCampoObligatorio
 import cl.duoc.bitacora.util.validarEnlace
 import cl.duoc.bitacora.util.validarFechaClase
@@ -265,6 +266,11 @@ class NuevoRegistroViewModel(
 
                 if (enviar) {
                     Sesion.exito("Registro enviado a tu docente.")
+                    mostrarNotificacion(
+                        getApplication<Application>(),
+                        "Registro enviado",
+                        "Tu docente ya puede revisar tu aporte."
+                    )
                 } else {
                     // Borrador = aviso (ámbar): todavía falta enviarlo
                     Sesion.advertencia("Borrador guardado. Recuerda enviarlo a tu docente.")

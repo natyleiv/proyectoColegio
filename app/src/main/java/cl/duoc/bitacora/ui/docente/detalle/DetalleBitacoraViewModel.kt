@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import cl.duoc.bitacora.util.formatearFechaCalendario
+import cl.duoc.bitacora.util.mostrarNotificacion
 
 class DetalleBitacoraViewModel(
     application: Application
@@ -134,6 +135,11 @@ class DetalleBitacoraViewModel(
             try {
                 bitacoraRepository.publicar(bitacoraId, docenteId, fechaHoy())
                 Sesion.exito("Bitácora publicada: los estudiantes ya pueden participar.")
+                mostrarNotificacion(
+                    getApplication<Application>(),
+                    "Bitácora publicada",
+                    "Los estudiantes del curso ya pueden participar."
+                )
             } catch (e: Exception) {
                 Sesion.error("No se pudo publicar la bitácora. Intenta nuevamente.")
             }
