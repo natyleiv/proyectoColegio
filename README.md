@@ -61,7 +61,7 @@ La app centraliza la **bitácora mensual** y mantiene cada registro privado entr
 | Mensajes de éxito **y** de error, colores semánticos | `ui/componentes/PantallaBase.kt` (`MensajeSesion`), `Sesion.exito/advertencia/error`, `ui/theme/Color.kt` |
 | Editar bitácoras | `ui/docente/crear/` (modo edición) y botón "Editar bitácora" en `DetalleBitacoraScreen` |
 | Diseño adaptable a distintos tamaños de pantalla | `PantallaBase` (contenido centrado, ancho máximo 720 dp) |
-| GitHub + Trello | Este repositorio y el tablero de Trello del equipo |
+
 
 ## Modelo de datos (normalizado, 3FN)
 
