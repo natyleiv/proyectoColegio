@@ -18,28 +18,38 @@ import cl.duoc.bitacora.model.EstadoBitacora
 import cl.duoc.bitacora.model.EstadoEnvio
 import cl.duoc.bitacora.model.EstadoRevision
 import cl.duoc.bitacora.data.RegistroDetalle
-import cl.duoc.bitacora.ui.theme.ColorAdvertenciaSuave
-import cl.duoc.bitacora.ui.theme.ColorBorrador
-import cl.duoc.bitacora.ui.theme.ColorCerrada
-import cl.duoc.bitacora.ui.theme.ColorExitoSuave
-import cl.duoc.bitacora.ui.theme.ColorPublicada
-import cl.duoc.bitacora.ui.theme.TextoSobreEtiqueta
+import cl.duoc.bitacora.ui.theme.FondoActiva
+import cl.duoc.bitacora.ui.theme.FondoBorrador
+import cl.duoc.bitacora.ui.theme.FondoCerrada
+import cl.duoc.bitacora.ui.theme.FondoEnviado
+import cl.duoc.bitacora.ui.theme.FondoPendiente
+import cl.duoc.bitacora.ui.theme.TextoActiva
+import cl.duoc.bitacora.ui.theme.TextoBorrador
+import cl.duoc.bitacora.ui.theme.TextoCerrada
+import cl.duoc.bitacora.ui.theme.TextoEnviado
+import cl.duoc.bitacora.ui.theme.TextoPendiente
 
-// Etiqueta de color. Si el estado cambia, el color cambia con una animación (animateColorAsState).
+// Etiqueta de color con fondo pastel y texto del mismo tono.
+// Si el estado cambia, los colores cambian con una animación (animateColorAsState).
 @Composable
-fun EtiquetaEstado(texto: String, colorObjetivo: Color) {
-    val color by animateColorAsState(
-        targetValue = colorObjetivo,
+fun EtiquetaEstado(texto: String, fondoObjetivo: Color, textoObjetivo: Color) {
+    val fondo by animateColorAsState(
+        targetValue = fondoObjetivo,
         animationSpec = tween(durationMillis = 600),
-        label = "Color de la etiqueta"
+        label = "Fondo de la etiqueta"
+    )
+    val colorTexto by animateColorAsState(
+        targetValue = textoObjetivo,
+        animationSpec = tween(durationMillis = 600),
+        label = "Texto de la etiqueta"
     )
     Surface(
-        color = color,
+        color = fondo,
         shape = RoundedCornerShape(50)
     ) {
         Text(
             text = texto,
-            color = TextoSobreEtiqueta,
+            color = colorTexto,
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
         )
@@ -50,9 +60,9 @@ fun EtiquetaEstado(texto: String, colorObjetivo: Color) {
 @Composable
 fun EtiquetaBitacora(estado: String) {
     when (estado) {
-        EstadoBitacora.PUBLICADA -> EtiquetaEstado("Activa", ColorPublicada)
-        EstadoBitacora.CERRADA -> EtiquetaEstado("Cerrada", ColorCerrada)
-        else -> EtiquetaEstado("Borrador", ColorBorrador)
+        EstadoBitacora.PUBLICADA -> EtiquetaEstado("Activa", FondoActiva, TextoActiva)
+        EstadoBitacora.CERRADA -> EtiquetaEstado("Cerrada", FondoCerrada, TextoCerrada)
+        else -> EtiquetaEstado("Borrador", FondoBorrador, TextoBorrador)
     }
 }
 
@@ -61,13 +71,13 @@ fun EtiquetaBitacora(estado: String) {
 fun EtiquetasRegistro(registro: RegistroDetalle) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (registro.estadoEnvio == EstadoEnvio.BORRADOR) {
-            EtiquetaEstado("Borrador", ColorBorrador)
+            EtiquetaEstado("Borrador", FondoBorrador, TextoBorrador)
         } else {
-            EtiquetaEstado("Enviado", ColorPublicada)
+            EtiquetaEstado("Enviado", FondoEnviado, TextoEnviado)
             if (registro.estadoRevision == EstadoRevision.REVISADO) {
-                EtiquetaEstado("Revisado", ColorExitoSuave)
+                EtiquetaEstado("Revisado", FondoActiva, TextoActiva)
             } else {
-                EtiquetaEstado("Pendiente de revisión", ColorAdvertenciaSuave)
+                EtiquetaEstado("Pendiente de revisión", FondoPendiente, TextoPendiente)
             }
         }
     }
