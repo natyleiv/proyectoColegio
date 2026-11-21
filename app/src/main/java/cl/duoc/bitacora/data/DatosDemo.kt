@@ -29,7 +29,7 @@ suspend fun cargarDatosDemo(db: AppDatabase) {
     // 2) Usuarios
     val usuarios = db.usuarioDao()
     // Docentes (contraseña: docente123)
-    usuarios.insertar(Usuario(1, "Profesora Ana Rojas", "docente1@escuela.cl", "docente123", Perfil.DOCENTE))
+    usuarios.insertar(Usuario(1, "Profesor Christian Acuña", "docente1@escuela.cl", "docente123", Perfil.DOCENTE))
     usuarios.insertar(Usuario(2, "Profesor Luis Soto", "docente2@escuela.cl", "docente123", Perfil.DOCENTE))
     // Estudiantes (contraseña: alumno123); cursoId 1 = 5°A, 2 = 6°B
     usuarios.insertar(Usuario(3, "Estudiante Uno", "alumno1@escuela.cl", "alumno123", Perfil.ESTUDIANTE, 1))
@@ -40,8 +40,8 @@ suspend fun cargarDatosDemo(db: AppDatabase) {
 
     // 3) Asignaciones (docente - curso - asignatura)
     val asignaciones = db.asignacionDao()
-    asignaciones.insertar(Asignacion(1, docenteId = 1, cursoId = 1, asignaturaId = 1)) // Ana: 5°A Matemática
-    asignaciones.insertar(Asignacion(2, docenteId = 1, cursoId = 1, asignaturaId = 2)) // Ana: 5°A Lenguaje
+    asignaciones.insertar(Asignacion(1, docenteId = 1, cursoId = 1, asignaturaId = 1)) // Christian Acuña: 5°A Matemática
+    asignaciones.insertar(Asignacion(2, docenteId = 1, cursoId = 1, asignaturaId = 2)) // Christian Acuña: 5°A Lenguaje
     asignaciones.insertar(Asignacion(3, docenteId = 2, cursoId = 2, asignaturaId = 3)) // Luis: 6°B Historia
 
     // 4) Bitácoras y sus preguntas orientadoras

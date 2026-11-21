@@ -5,7 +5,7 @@ import androidx.room3.ForeignKey
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
 
-// Relación docente - curso - asignatura (ej: Ana Rojas enseña Matemática en 5°A).
+// Relación docente - curso - asignatura (ej: Christian Acuña enseña Matemática en 5°A).
 // Es la tabla que une a las otras tres (3 claves foráneas).
 @Entity(
     tableName = "asignaciones",
