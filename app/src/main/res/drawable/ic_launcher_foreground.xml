@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Primer plano del ícono: un cuaderno (la bitácora) con líneas de escritura y un check verde
+<!-- Primer plano del ícono: un cuaderno (la bitácora) con líneas de escritura y un check menta
      (registro enviado/revisado). Todo está dentro de la zona segura de 66dp centrada. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -12,25 +12,25 @@
         android:fillColor="#FFFFFF"
         android:pathData="M37,28h34a4,4 0 0 1 4,4v44a4,4 0 0 1 -4,4h-34a4,4 0 0 1 -4,-4v-44a4,4 0 0 1 4,-4z" />
 
-    <!-- Lomo naranja -->
+    <!-- Lomo tinta -->
     <path
-        android:fillColor="#FF8F00"
+        android:fillColor="#24202D"
         android:pathData="M37,28h3v52h-3a4,4 0 0 1 -4,-4v-44a4,4 0 0 1 4,-4z" />
 
     <!-- Líneas de escritura -->
     <path
-        android:fillColor="#9DB8F5"
+        android:fillColor="#E8C3D4"
         android:pathData="M45,38h24v3h-24z" />
     <path
-        android:fillColor="#9DB8F5"
+        android:fillColor="#E8C3D4"
         android:pathData="M45,46h24v3h-24z" />
     <path
-        android:fillColor="#9DB8F5"
+        android:fillColor="#E8C3D4"
         android:pathData="M45,54h16v3h-16z" />
 
-    <!-- Círculo verde con check -->
+    <!-- Círculo menta con check -->
     <path
-        android:fillColor="#43A047"
+        android:fillColor="#43A786"
         android:pathData="M68,63m-10,0a10,10 0 1 1 20,0a10,10 0 1 1 -20,0" />
     <path
         android:fillColor="#00000000"
