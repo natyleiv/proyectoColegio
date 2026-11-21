@@ -1,21 +1,32 @@
 package cl.duoc.bitacora.ui.componentes
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,7 +40,9 @@ fun TarjetaBienvenida(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(
+            // Rosa pastel de la paleta (primaryContainer en ui/theme)
             containerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
@@ -140,5 +153,65 @@ fun IndicadorResumen(
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+// Botón que muestra u oculta contenido con una animación (AnimatedVisibility).
+// Sirve para no llenar la tarjeta de texto: el detalle aparece solo cuando el usuario lo pide.
+@Composable
+fun DetalleDesplegable(
+    textoVer: String = "Ver detalles",
+    textoOcultar: String = "Ocultar detalles",
+    contenido: @Composable () -> Unit
+) {
+    var abierto by rememberSaveable { mutableStateOf(false) }
+    Column {
+        TextButton(
+            onClick = { abierto = !abierto },
+            contentPadding = PaddingValues(horizontal = 0.dp)
+        ) {
+            Text(if (abierto) textoOcultar else textoVer)
+            Icon(
+                imageVector = if (abierto) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                contentDescription = null
+            )
+        }
+        AnimatedVisibility(visible = abierto) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                contenido()
+            }
+        }
+    }
+}
+
+// Bloque con título y texto. Si es "destacado" se pinta con el rosa suave de la paleta.
+@Composable
+fun BloqueTexto(
+    titulo: String,
+    texto: String,
+    destacado: Boolean = false
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        // Sin destacar, el fondo es transparente para dejar ver el color de la tarjeta
+        color = if (destacado) MaterialTheme.colorScheme.primaryContainer
+        else Color.Transparent
+    ) {
+        Column(
+            modifier = Modifier.padding(if (destacado) 12.dp else 0.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = titulo,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = texto,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }

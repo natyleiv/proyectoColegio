@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.bitacora.model.EstadoBitacora
+import androidx.compose.ui.Alignment
+import cl.duoc.bitacora.ui.componentes.BloqueTexto
+import cl.duoc.bitacora.ui.componentes.DetalleDesplegable
 import cl.duoc.bitacora.ui.componentes.EtiquetaBitacora
 import cl.duoc.bitacora.ui.componentes.EtiquetasRegistro
 import cl.duoc.bitacora.ui.componentes.MensajeSesion
@@ -112,20 +115,39 @@ fun DetalleBitacoraScreen(
                                 text = bitacoraActual.titulo,
                                 style = MaterialTheme.typography.titleLarge
                             )
-                            Text("${bitacoraActual.curso} · ${bitacoraActual.asignatura}")
-                            Text("${nombreMes(bitacoraActual.mes)} ${bitacoraActual.anio}")
-                            EtiquetaBitacora(bitacoraActual.estado)
-                            Text("Propósito: ${bitacoraActual.proposito}")
-                            Text("Instrucciones: ${bitacoraActual.instrucciones}")
-                            Text("Preguntas orientadoras:")
-                            preguntas.forEach { pregunta ->
-                                Text("${pregunta.orden}. ${pregunta.texto}")
-                            }
-                            if (bitacoraActual.fechaPublicacion.isNotBlank()) {
-                                Text("Publicada el ${bitacoraActual.fechaPublicacion}")
+                            Text(
+                                text = "${bitacoraActual.curso} · ${bitacoraActual.asignatura} · " +
+                                    "${nombreMes(bitacoraActual.mes)} ${bitacoraActual.anio}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                EtiquetaBitacora(bitacoraActual.estado)
+                                if (bitacoraActual.fechaPublicacion.isNotBlank()) {
+                                    Text(
+                                        text = "Publicada el ${bitacoraActual.fechaPublicacion}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                             if (bitacoraActual.fechaCierre.isNotBlank()) {
-                                Text("Cerrada el ${bitacoraActual.fechaCierre}")
+                                Text(
+                                    text = "Cerrada el ${bitacoraActual.fechaCierre}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            // El texto largo queda oculto hasta que el docente pulsa "Ver detalles"
+                            DetalleDesplegable {
+                                BloqueTexto("Propósito", bitacoraActual.proposito, destacado = true)
+                                BloqueTexto("Instrucciones", bitacoraActual.instrucciones)
+                                BloqueTexto(
+                                    "Preguntas orientadoras",
+                                    preguntas.joinToString("\n") { "${it.orden}. ${it.texto}" }
+                                )
                             }
                         }
                     }
@@ -190,13 +212,15 @@ fun DetalleBitacoraScreen(
                             )
                             Text("Aportes enviados: ${uiState.totalAportes}")
                             Text("Revisados: ${uiState.revisados}  ·  Pendientes: ${uiState.pendientes}")
+                            // La lista de nombres queda oculta: solo se ven los números
                             if (uiState.sinParticipacion.isNotEmpty()) {
-                                Text(
-                                    text = "Sin participación:",
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                                uiState.sinParticipacion.forEach { nombre ->
-                                    Text("• $nombre")
+                                DetalleDesplegable(
+                                    textoVer = "Ver estudiantes sin participación (${uiState.sinParticipacion.size})",
+                                    textoOcultar = "Ocultar estudiantes"
+                                ) {
+                                    uiState.sinParticipacion.forEach { nombre ->
+                                        Text("• $nombre")
+                                    }
                                 }
                             }
                         }
