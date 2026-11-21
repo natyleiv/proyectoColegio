@@ -33,8 +33,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.bitacora.ui.componentes.BloqueTexto
 import cl.duoc.bitacora.ui.componentes.CampoFecha
 import cl.duoc.bitacora.ui.componentes.CampoFormulario
+import cl.duoc.bitacora.ui.componentes.DetalleDesplegable
 import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.ui.componentes.SelectorEvidencia
@@ -86,13 +88,15 @@ fun NuevoRegistroScreen(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Instrucciones: ${uiState.instrucciones}")
-                        Text(
-                            text = "Preguntas orientadoras:",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                        Text(uiState.preguntas)
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        // Se despliega solo cuando el estudiante lo necesita
+                        DetalleDesplegable(
+                            textoVer = "Ver instrucciones y preguntas",
+                            textoOcultar = "Ocultar instrucciones y preguntas"
+                        ) {
+                            BloqueTexto("Instrucciones", uiState.instrucciones)
+                            BloqueTexto("Preguntas orientadoras", uiState.preguntas)
+                        }
                     }
                 }
 

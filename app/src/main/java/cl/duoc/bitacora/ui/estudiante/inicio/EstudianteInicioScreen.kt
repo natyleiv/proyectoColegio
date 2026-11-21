@@ -34,6 +34,7 @@ import cl.duoc.bitacora.util.nombreMes
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Inbox
+import cl.duoc.bitacora.ui.componentes.DetalleDesplegable
 import cl.duoc.bitacora.ui.componentes.EstadoVacio
 import cl.duoc.bitacora.ui.componentes.TarjetaBienvenida
 import cl.duoc.bitacora.ui.componentes.TituloSeccion
@@ -111,7 +112,13 @@ fun EstudianteInicioScreen(
                         )
                         Text("${bitacora.asignatura} · ${nombreMes(bitacora.mes)} ${bitacora.anio}")
                         EtiquetaBitacora(bitacora.estado)
-                        Text("Propósito: ${bitacora.proposito}")
+                        // El propósito queda oculto hasta que el estudiante lo pide
+                        DetalleDesplegable(
+                            textoVer = "Ver propósito",
+                            textoOcultar = "Ocultar propósito"
+                        ) {
+                            Text(bitacora.proposito)
+                        }
                         Button(
                             onClick = { onNuevoRegistro(bitacora.id) },
                             modifier = Modifier.fillMaxWidth()
