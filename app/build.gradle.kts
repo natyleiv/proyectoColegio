@@ -1,3 +1,11 @@
+import java.util.Properties
+
+// Datos de la firma del APK: se leen de keystore.properties (raíz del proyecto)
+val propiedadesFirma = Properties().apply {
+    val archivo = rootProject.file("keystore.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -17,10 +25,21 @@ android {
         applicationId = "cl.duoc.bitacora"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        // Versión del APK (EP4). Para publicar una actualización se sube versionCode y se mantiene la misma firma
+        versionCode = 2
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Firma digital del APK release: usa el .jks de la carpeta firma/ (llave de demostración académica)
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file(propiedadesFirma.getProperty("storeFile", "firma/mibitacora-demo.jks"))
+            storePassword = propiedadesFirma.getProperty("storePassword")
+            keyAlias = propiedadesFirma.getProperty("keyAlias")
+            keyPassword = propiedadesFirma.getProperty("keyPassword")
+        }
     }
 
     buildTypes {
@@ -28,6 +47,8 @@ android {
             optimization {
                 enable = false
             }
+            // El APK release sale firmado con la configuración de arriba
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -115,4 +136,18 @@ kover {
 // con Java 25, más nuevo que lo que Byte Buddy soporta oficialmente: este modo lo habilita.
 tasks.withType<Test>().configureEach {
     jvmArgs("-Dnet.bytebuddy.experimental=true")
+}
+
+// Genera el APK release firmado y lo copia a la carpeta apk/ con un nombre legible:
+//   .\gradlew.bat :app:exportarApkRelease   ->   apk/MiBitacora-v2.0-build2.apk
+tasks.register<Copy>("exportarApkRelease") {
+    dependsOn("assembleRelease")
+    val nombreApp = "MiBitacora"
+    val version = android.defaultConfig.versionName ?: "1.0"
+    val build = android.defaultConfig.versionCode ?: 1
+    from(layout.buildDirectory.dir("outputs/apk/release")) {
+        include("app-release.apk")
+        rename { "$nombreApp-v$version-build$build.apk" }
+    }
+    into(rootProject.layout.projectDirectory.dir("apk"))
 }
