@@ -161,7 +161,14 @@ gradlew.bat :app:koverVerifyDebug           # falla si la cobertura baja del 80 
 
 ## APK firmado
 
-_(Sección a completar al generar la APK release.)_
+La APK release (versión 2.0, build 2) está firmada con un archivo `.jks` que queda en el repositorio junto a su configuración.
+
+**Cómo se generó**
+
+1. Se creó el keystore `firma/mibitacora-demo.jks` (tipo JKS, alias `nataliakey`, validez de 4 años, certificado a nombre de Natalia).
+2. Los datos de la firma están en `keystore.properties` y `app/build.gradle.kts` los lee en el bloque `signingConfigs { release }`.
+3. Se generó la APK con `.\gradlew.bat :app:exportarApkRelease` (o desde Android Studio: *Build > Generate Signed Bundle / APK > APK > release*). El resultado queda en `apk/`.
+4. Se verificó la firma con `apksigner verify --verbose --print-certs apk/MiBitacora-v2.0-build2.apk` y se instaló en el emulador con `adb install -r`.
 
 - APK: `apk/MiBitacora-v2.0-build2.apk`
 - Keystore de demostración académica: `firma/mibitacora-demo.jks` (configuración en `keystore.properties` y `app/build.gradle.kts`)
@@ -169,9 +176,17 @@ _(Sección a completar al generar la APK release.)_
 
 Capturas:
 
-- Creación del keystore: `docs/capturas/keystore.png`
-- Verificación de la firma (`apksigner verify --print-certs`): `docs/capturas/apksigner.png`
-- APK instalada y funcionando: `docs/capturas/apk-instalada.png`
+Keystore `.jks` (alias `nataliakey`, certificado a nombre de Natalia):
+
+![Keystore](docs/capturas/keystore.png)
+
+Verificación de la firma de la APK (`apksigner verify --print-certs`):
+
+![Verificación con apksigner](docs/capturas/apksigner.png)
+
+APK firmada instalada y funcionando en el emulador:
+
+![APK instalada](docs/capturas/apk-instalada.png)
 
 ## Requisitos de la Evaluación Parcial 4 y dónde están
 
