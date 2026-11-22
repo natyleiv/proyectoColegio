@@ -37,6 +37,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    // Pruebas unitarias: si el código llama a alguna función de Android (que no existe en la JVM),
+    // devuelve un valor por defecto en vez de fallar. Necesario para probar ViewModels.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -80,6 +86,12 @@ dependencies {
 // presentación visual y no cuentan para la meta del 80 % (guía del profesor, sección 4).
 kover {
     reports {
+        // Igual que el ejemplo del profesor: koverVerify falla si la cobertura baja del 80 %
+        verify {
+            rule("Cobertura mínima del proyecto") {
+                minBound(80)
+            }
+        }
         filters {
             includes {
                 classes(
@@ -90,7 +102,8 @@ kover {
                     "cl.duoc.bitacora.data.remote.ErrorServidor",
                     "cl.duoc.bitacora.data.UsuarioRepository*",
                     "cl.duoc.bitacora.data.BitacoraRepository*",
-                    "cl.duoc.bitacora.data.RegistroRepository*"
+                    "cl.duoc.bitacora.data.RegistroRepository*",
+                    "cl.duoc.bitacora.ui.login.LoginViewModel*"
                 )
             }
         }

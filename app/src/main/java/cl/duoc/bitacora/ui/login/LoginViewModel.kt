@@ -16,15 +16,23 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 class LoginViewModel(
-    application: Application
+    application: Application,
+    private val repository: UsuarioRepository
 ) : AndroidViewModel(application) {
 
-    private val database = AppDatabase.getInstance(application)
-    private val repository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
+    // Constructor que usa la app (viewModel() en LoginScreen): crea el repositorio real (Room + Retrofit).
+    // El constructor de arriba recibe el repositorio desde afuera: lo usan las pruebas con uno simulado.
+    constructor(application: Application) : this(application, crearRepositorio(application))
+
+    companion object {
+        private fun crearRepositorio(application: Application): UsuarioRepository {
+            val database = AppDatabase.getInstance(application)
+            return UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
+        }
+    }
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
-
 
 
     fun cambiarCorreo(nuevoCorreo: String) {
