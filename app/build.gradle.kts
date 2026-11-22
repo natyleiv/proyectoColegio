@@ -68,6 +68,11 @@ dependencies {
     // Retrofit para conectarse a los microservicios (EP4)
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+
+    // Pruebas unitarias: MockK para simular la API y los DAO,
+    // y coroutines-test para ejecutar funciones suspend dentro de las pruebas (runTest)
+    testImplementation("io.mockk:mockk:1.14.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 }
 // Kover: mide qué parte de la lógica ejecutan las pruebas unitarias.
 // Se incluyen las clases con lógica de negocio (validaciones, fechas, conversión de datos,
@@ -90,4 +95,9 @@ kover {
             }
         }
     }
+}
+// MockK usa Byte Buddy para crear los objetos falsos. Android Studio ejecuta las pruebas
+// con Java 25, más nuevo que lo que Byte Buddy soporta oficialmente: este modo lo habilita.
+tasks.withType<Test>().configureEach {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
 }
