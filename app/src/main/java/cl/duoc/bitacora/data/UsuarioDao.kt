@@ -1,8 +1,9 @@
 package cl.duoc.bitacora.data
 
 import androidx.room3.Dao
-import androidx.room3.Insert
+
 import androidx.room3.Query
+import androidx.room3.Upsert
 import cl.duoc.bitacora.model.Usuario
 import kotlinx.coroutines.flow.Flow
 
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface UsuarioDao {
 
-    @Insert
+    @Upsert
     suspend fun insertar(usuario: Usuario)
 
     @Query("SELECT COUNT(*) FROM usuarios")

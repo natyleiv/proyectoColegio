@@ -3,8 +3,7 @@
 
     <!-- Notificaciones: desde Android 13 hay que pedir este permiso al usuario -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Notificaciones: desde Android 13 hay que pedir este permiso al usuario -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Internet: para conectarse a los microservicios (EP4) -->
     <uses-permission android:name="android.permission.INTERNET" />
 

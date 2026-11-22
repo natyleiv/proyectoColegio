@@ -1,15 +1,15 @@
 package cl.duoc.bitacora.data
 
 import androidx.room3.Dao
-import androidx.room3.Insert
 import androidx.room3.Query
+import androidx.room3.Upsert
 import cl.duoc.bitacora.model.Asignacion
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AsignacionDao {
 
-    @Insert
+    @Upsert
     suspend fun insertar(asignacion: Asignacion)
 
     // Asignaciones del docente con el nombre del curso y de la asignatura (JOIN)

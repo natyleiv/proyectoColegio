@@ -1,16 +1,22 @@
 package cl.duoc.bitacora.data.remote
 
+import cl.duoc.bitacora.model.Asignacion
+import cl.duoc.bitacora.model.Asignatura
 import cl.duoc.bitacora.model.Bitacora
+import cl.duoc.bitacora.model.Curso
 import cl.duoc.bitacora.model.EstadoBitacora
 import cl.duoc.bitacora.model.EstadoEnvio
 import cl.duoc.bitacora.model.PreguntaOrientadora
 import cl.duoc.bitacora.model.Registro
 import cl.duoc.bitacora.model.Retroalimentacion
+import cl.duoc.bitacora.model.Usuario
 
-// Cómo viaja cada dato por la red (el JSON de ms-bitacoras).
+// Cómo viaja cada dato por la red (el JSON de los microservicios).
 // Todos los campos aceptan null (?), porque el backend a veces manda null
 // (por ejemplo fechaCierre o dudas). Al pasarlos al modelo de la app
 // se reemplazan por un valor por defecto, así la app nunca recibe un null inesperado.
+
+// ======================= ms-bitacoras =======================
 
 data class BitacoraRemota(
     val id: Int? = null,
@@ -56,7 +62,42 @@ data class RetroalimentacionRemota(
     val fecha: Long? = null
 )
 
-// Conversiones entre lo que llega por la red y los modelos de la app (Room)
+// ======================= ms-usuarios =======================
+
+// Lo que se envía al iniciar sesión
+data class LoginRemoto(
+    val correo: String,
+    val password: String
+)
+
+// El backend nunca devuelve la contraseña, por eso no está aquí
+data class UsuarioRemoto(
+    val id: Int? = null,
+    val nombre: String? = null,
+    val correo: String? = null,
+    val perfil: String? = null,
+    val cursoId: Int? = null
+)
+
+data class CursoRemoto(
+    val id: Int? = null,
+    val nombre: String? = null
+)
+
+data class AsignaturaRemota(
+    val id: Int? = null,
+    val nombre: String? = null
+)
+
+data class AsignacionRemota(
+    val id: Int? = null,
+    val docenteId: Int? = null,
+    val cursoId: Int? = null,
+    val asignaturaId: Int? = null
+)
+
+// ======================= Conversiones =======================
+// Entre lo que llega por la red y los modelos de la app (Room)
 object MapeoRemoto {
 
     // ---------- Bitácora ----------
@@ -142,6 +183,36 @@ object MapeoRemoto {
             docenteId = remota.docenteId ?: 0,
             comentario = remota.comentario ?: "",
             fecha = remota.fecha ?: 0L
+        )
+    }
+
+    // ---------- ms-usuarios ----------
+    // La contraseña queda vacía: el login se valida en el backend, no en el teléfono
+    fun aUsuario(remoto: UsuarioRemoto): Usuario {
+        return Usuario(
+            id = remoto.id ?: 0,
+            nombre = remoto.nombre ?: "",
+            correo = remoto.correo ?: "",
+            password = "",
+            perfil = remoto.perfil ?: "",
+            cursoId = remoto.cursoId
+        )
+    }
+
+    fun aCurso(remoto: CursoRemoto): Curso {
+        return Curso(id = remoto.id ?: 0, nombre = remoto.nombre ?: "")
+    }
+
+    fun aAsignatura(remota: AsignaturaRemota): Asignatura {
+        return Asignatura(id = remota.id ?: 0, nombre = remota.nombre ?: "")
+    }
+
+    fun aAsignacion(remota: AsignacionRemota): Asignacion {
+        return Asignacion(
+            id = remota.id ?: 0,
+            docenteId = remota.docenteId ?: 0,
+            cursoId = remota.cursoId ?: 0,
+            asignaturaId = remota.asignaturaId ?: 0
         )
     }
 }

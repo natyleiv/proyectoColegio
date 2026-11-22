@@ -7,14 +7,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 // 10.0.2.2 es la IP con la que el emulador llega al "localhost" del computador.
 object RetrofitClient {
 
+    private const val URL_USUARIOS = "http://10.0.2.2:8081/"
     private const val URL_BITACORAS = "http://10.0.2.2:8082/"
-    // ms-usuarios (8081): se agrega en el paso del login, junto con UsuariosApi
 
     private fun crearRetrofit(urlBase: String): Retrofit {
         return Retrofit.Builder()
             .baseUrl(urlBase)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    val usuariosApi: UsuariosApi by lazy {
+        crearRetrofit(URL_USUARIOS).create(UsuariosApi::class.java)
     }
 
     val bitacorasApi: BitacorasApi by lazy {
