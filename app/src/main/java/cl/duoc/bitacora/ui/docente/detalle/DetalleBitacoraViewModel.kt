@@ -11,7 +11,7 @@ import cl.duoc.bitacora.data.BitacoraDetalle
 import cl.duoc.bitacora.model.PreguntaOrientadora
 import cl.duoc.bitacora.model.EstadoRevision
 import cl.duoc.bitacora.util.Sesion
-import cl.duoc.bitacora.util.fechaHoy
+import cl.duoc.bitacora.data.remote.mensajeDeError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -133,7 +133,7 @@ class DetalleBitacoraViewModel(
     fun publicar() {
         viewModelScope.launch {
             try {
-                bitacoraRepository.publicar(bitacoraId, docenteId, fechaHoy())
+                bitacoraRepository.publicar(bitacoraId, docenteId)
                 Sesion.exito("Bitácora publicada: los estudiantes ya pueden participar.")
                 mostrarNotificacion(
                     getApplication<Application>(),
@@ -141,7 +141,7 @@ class DetalleBitacoraViewModel(
                     "Los estudiantes del curso ya pueden participar."
                 )
             } catch (e: Exception) {
-                Sesion.error("No se pudo publicar la bitácora. Intenta nuevamente.")
+                Sesion.error(mensajeDeError(e, "No se pudo publicar la bitácora. Intenta nuevamente."))
             }
         }
     }
@@ -149,10 +149,10 @@ class DetalleBitacoraViewModel(
     fun cerrar() {
         viewModelScope.launch {
             try {
-                bitacoraRepository.cerrar(bitacoraId, docenteId, fechaHoy())
+                bitacoraRepository.cerrar(bitacoraId, docenteId)
                 Sesion.advertencia("Bitácora cerrada: ya no se reciben más aportes.")
             } catch (e: Exception) {
-                Sesion.error("No se pudo cerrar la bitácora. Intenta nuevamente.")
+                Sesion.error(mensajeDeError(e, "No se pudo cerrar la bitácora. Intenta nuevamente."))
             }
         }
     }

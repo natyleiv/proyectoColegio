@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import cl.duoc.bitacora.data.remote.mensajeDeError
 
 class EstudianteInicioViewModel(
     application: Application
@@ -36,6 +37,12 @@ class EstudianteInicioViewModel(
                 _nombreCurso.value = usuarioRepository.nombreCurso(cursoId)
             } catch (e: Exception) {
                 Sesion.error("No se pudo cargar tu curso.")
+            }
+            // Bitácoras publicadas desde ms-bitacoras; la lista se actualiza sola desde Room
+            try {
+                repository.sincronizar()
+            } catch (e: Exception) {
+                Sesion.error(mensajeDeError(e, "No se pudieron actualizar las bitácoras."))
             }
         }
     }

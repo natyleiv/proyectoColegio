@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import cl.duoc.bitacora.data.remote.mensajeDeError
 
 class CrearBitacoraViewModel(
     application: Application
@@ -228,7 +229,7 @@ class CrearBitacoraViewModel(
                     }
                     _uiState.update { it.copy(guardada = true) }
                 } catch (e: Exception) {
-                    Sesion.error("No se pudo guardar la bitácora. Intenta nuevamente.")
+                    Sesion.error(mensajeDeError(e, "No se pudo guardar la bitácora. Intenta nuevamente."))
                 }
             }
         }

@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duoc.bitacora.data.AppDatabase
 import cl.duoc.bitacora.data.UsuarioRepository
-import cl.duoc.bitacora.data.cargarDatosDemo
 import cl.duoc.bitacora.util.Sesion
 import cl.duoc.bitacora.util.validarCorreo
 import cl.duoc.bitacora.util.validarPassword
@@ -26,16 +25,7 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    init {
-        // Primera ejecución: carga usuarios y bitácoras ficticias de prueba
-        viewModelScope.launch {
-            try {
-                cargarDatosDemo(database)
-            } catch (e: Exception) {
-                Sesion.error("No se pudieron cargar los datos de prueba.")
-            }
-        }
-    }
+
 
     fun cambiarCorreo(nuevoCorreo: String) {
         _uiState.update { estadoActual ->

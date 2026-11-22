@@ -1,26 +1,34 @@
 package cl.duoc.bitacora.data
 
 import androidx.room3.Dao
-import androidx.room3.Insert
 import androidx.room3.Query
+import androidx.room3.Upsert
 import cl.duoc.bitacora.model.Bitacora
 import cl.duoc.bitacora.model.PreguntaOrientadora
 import kotlinx.coroutines.flow.Flow
 
+// Room guarda una copia local de las bitácoras de ms-bitacoras.
+// Las escrituras van primero al backend; aquí solo se guarda lo que el backend aceptó.
 @Dao
 interface BitacoraDao {
 
-    @Insert
-    suspend fun insertar(bitacora: Bitacora)
+    // ---------- Guardar lo que llega del backend ----------
+    // Inserta o actualiza sin borrar (así no se dispara el CASCADE sobre los registros)
+    @Upsert
+    suspend fun guardarBitacoras(bitacoras: List<Bitacora>)
 
-    @Insert
-    suspend fun insertarPregunta(pregunta: PreguntaOrientadora)
+    @Upsert
+    suspend fun guardarPreguntas(preguntas: List<PreguntaOrientadora>)
 
-    // Siguiente id libre (se asigna a mano para poder crear las preguntas con su bitacoraId)
-    @Query("SELECT COALESCE(MAX(id), 0) + 1 FROM bitacoras")
-    suspend fun siguienteId(): Int
+    // Quita de Room las bitácoras que ya no existen en el servidor
+    @Query("DELETE FROM bitacoras WHERE id NOT IN (:ids)")
+    suspend fun borrarLasQueNoEstan(ids: List<Int>)
 
-    // Parte común de los SELECT con JOIN (se repite en cada consulta)
+    // Al reemplazar las preguntas se borran las anteriores
+    @Query("DELETE FROM preguntas_orientadoras WHERE bitacoraId = :bitacoraId")
+    suspend fun borrarPreguntas(bitacoraId: Int)
+
+    // ---------- Consultas para las pantallas ----------
     // bitacoras b -> asignaciones a (docente) -> cursos c / asignaturas s
 
     // Solo las bitácoras del docente que inició sesión
@@ -104,41 +112,17 @@ interface BitacoraDao {
     @Query("SELECT * FROM preguntas_orientadoras WHERE bitacoraId = :bitacoraId ORDER BY orden")
     suspend fun obtenerPreguntasUnaVez(bitacoraId: Int): List<PreguntaOrientadora>
 
-    // Solo el docente dueño puede publicar y solo desde BORRADOR
-    @Query(
-        """
-        UPDATE bitacoras SET estado = 'PUBLICADA', fechaPublicacion = :fecha
-        WHERE id = :id AND estado = 'BORRADOR'
-          AND asignacionId IN (SELECT id FROM asignaciones WHERE docenteId = :docenteId)
-        """
-    )
-    suspend fun publicar(id: Int, docenteId: Int, fecha: String)
+    // ---------- Control de acceso (el backend no sabe qué docente inició sesión) ----------
 
-    // Solo el docente dueño puede cerrar y solo desde PUBLICADA
+    // Cuántas bitácoras de este docente tienen ese id (0 = no es suya)
     @Query(
         """
-        UPDATE bitacoras SET estado = 'CERRADA', fechaCierre = :fecha
-        WHERE id = :id AND estado = 'PUBLICADA'
-          AND asignacionId IN (SELECT id FROM asignaciones WHERE docenteId = :docenteId)
+        SELECT COUNT(*) FROM bitacoras b
+        INNER JOIN asignaciones a ON a.id = b.asignacionId
+        WHERE b.id = :id AND a.docenteId = :docenteId
         """
     )
-    suspend fun cerrar(id: Int, docenteId: Int, fecha: String)
-
-    // EDITAR: solo el docente dueño y solo mientras la bitácora sea BORRADOR
-    @Query(
-        """
-        UPDATE bitacoras
-        SET asignacionId = :asignacionId, titulo = :titulo, proposito = :proposito,
-            instrucciones = :instrucciones, mes = :mes, anio = :anio
-        WHERE id = :id AND estado = 'BORRADOR'
-          AND asignacionId IN (SELECT id FROM asignaciones WHERE docenteId = :docenteId)
-          AND :asignacionId IN (SELECT id FROM asignaciones WHERE docenteId = :docenteId)
-        """
-    )
-    suspend fun editar(
-        id: Int, docenteId: Int, asignacionId: Int, titulo: String,
-        proposito: String, instrucciones: String, mes: Int, anio: Int
-    )
+    suspend fun contarDelDocente(id: Int, docenteId: Int): Int
 
     // Cuántas bitácoras en BORRADOR de este docente tienen ese id (0 = no se puede editar)
     @Query(
@@ -149,11 +133,6 @@ interface BitacoraDao {
         """
     )
     suspend fun contarEditables(id: Int, docenteId: Int): Int
-
-    // Al editar se reemplazan las preguntas (se borran y se vuelven a crear)
-    @Query("DELETE FROM preguntas_orientadoras WHERE bitacoraId = :bitacoraId")
-    suspend fun borrarPreguntas(bitacoraId: Int)
-
 
     // Cuenta bitácoras de la misma asignación (curso + asignatura), mes y año.
     // idExcluir: al EDITAR se excluye la propia bitácora (al crear se pasa 0).

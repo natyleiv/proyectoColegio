@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import cl.duoc.bitacora.data.RegistroRepository
+import cl.duoc.bitacora.data.remote.mensajeDeError
+import kotlinx.coroutines.launch
 
 class DocenteInicioViewModel(
     application: Application
@@ -26,6 +28,17 @@ class DocenteInicioViewModel(
 
     // Solo se consulta lo que pertenece al docente que inició sesión
     private val docenteId = Sesion.usuario?.id ?: 0
+
+    // Al entrar se descargan las bitácoras de ms-bitacoras; la lista se actualiza sola desde Room
+    init {
+        viewModelScope.launch {
+            try {
+                bitacoraRepository.sincronizar()
+            } catch (e: Exception) {
+                Sesion.error(mensajeDeError(e, "No se pudieron actualizar las bitácoras."))
+            }
+        }
+    }
 
     val bitacoras: StateFlow<List<BitacoraDetalle>> =
         bitacoraRepository
