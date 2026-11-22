@@ -147,14 +147,20 @@ fun LoginScreen(
                 )
             }
 
+            // Mientras se espera la respuesta de ms-usuarios el botón se desactiva
+            // y cambia su texto (estado de carga visible)
             Button(
                 onClick = { viewModel.ingresar() },
+                enabled = !uiState.cargando,
                 colors = ButtonDefaults.buttonColors(containerColor = colorBoton),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text("Ingresar", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = if (uiState.cargando) "Ingresando…" else "Ingresar",
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
 
             // Ayuda para probar la app: dos accesos rápidos con cuentas ficticias.
@@ -176,6 +182,7 @@ fun LoginScreen(
                     AccesoPrueba(
                         texto = "Ingresar como docente",
                         icono = Icons.Filled.School,
+                        habilitado = !uiState.cargando,
                         onClick = {
                             viewModel.cambiarCorreo("docente1@escuela.cl")
                             viewModel.cambiarPassword("docente123")
@@ -185,6 +192,7 @@ fun LoginScreen(
                     AccesoPrueba(
                         texto = "Ingresar como estudiante",
                         icono = Icons.Filled.MenuBook,
+                        habilitado = !uiState.cargando,
                         onClick = {
                             viewModel.cambiarCorreo("alumno1@escuela.cl")
                             viewModel.cambiarPassword("alumno123")
@@ -202,10 +210,12 @@ fun LoginScreen(
 private fun AccesoPrueba(
     texto: String,
     icono: ImageVector,
+    habilitado: Boolean,
     onClick: () -> Unit
 ) {
     OutlinedButton(
         onClick = onClick,
+        enabled = habilitado,
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.surface

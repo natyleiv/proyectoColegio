@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 class LoginViewModel(
     application: Application
@@ -59,9 +60,10 @@ class LoginViewModel(
 
     fun ingresar() {
         val estado = _uiState.value
+        if (estado.cargando) return   // evita enviar dos veces si se toca el botón repetido
+
         val errorCorreo = !validarCorreo(estado.correo.trim())
         val errorPassword = !validarPassword(estado.password)
-
         _uiState.update { estadoActual ->
             estadoActual.copy(
                 errorCorreo = errorCorreo,
@@ -69,22 +71,27 @@ class LoginViewModel(
                 errorCredenciales = false
             )
         }
-
         if (!errorCorreo && !errorPassword) {
+            _uiState.update { it.copy(cargando = true) }
             viewModelScope.launch {
                 try {
                     val usuario = repository.iniciarSesion(estado.correo, estado.password)
                     if (usuario == null) {
                         _uiState.update { estadoActual ->
-                            estadoActual.copy(errorCredenciales = true)
+                            estadoActual.copy(errorCredenciales = true, cargando = false)
                         }
                     } else {
                         Sesion.usuario = usuario
                         _uiState.update { estadoActual ->
-                            estadoActual.copy(perfilIngresado = usuario.perfil)
+                            estadoActual.copy(perfilIngresado = usuario.perfil, cargando = false)
                         }
                     }
+                } catch (e: IOException) {
+                    // El servidor no respondió (microservicio apagado o sin red)
+                    _uiState.update { it.copy(cargando = false) }
+                    Sesion.error("No se pudo conectar con el servidor. Revisa que los microservicios estén encendidos.")
                 } catch (e: Exception) {
+                    _uiState.update { it.copy(cargando = false) }
                     Sesion.error("Error al iniciar sesión. Intenta nuevamente.")
                 }
             }

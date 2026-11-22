@@ -8,5 +8,7 @@ data class LoginUiState(
     val errorPassword: Boolean = false,
     val errorCredenciales: Boolean = false,
     // Perfil con el que se ingresó; la pantalla lo usa para navegar al inicio correcto
-    val perfilIngresado: String? = null
+    val perfilIngresado: String? = null,
+    // true mientras se espera la respuesta de ms-usuarios
+    val cargando: Boolean = false
 )
