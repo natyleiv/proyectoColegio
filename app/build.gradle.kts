@@ -103,7 +103,9 @@ kover {
                     "cl.duoc.bitacora.data.UsuarioRepository*",
                     "cl.duoc.bitacora.data.BitacoraRepository*",
                     "cl.duoc.bitacora.data.RegistroRepository*",
-                    "cl.duoc.bitacora.ui.login.LoginViewModel*"
+                    "cl.duoc.bitacora.ui.login.LoginViewModel*",
+                    "cl.duoc.bitacora.ui.docente.crear.CrearBitacoraViewModel*"
+
                 )
             }
         }

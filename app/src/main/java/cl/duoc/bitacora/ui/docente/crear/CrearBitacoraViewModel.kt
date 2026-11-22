@@ -28,12 +28,29 @@ import kotlinx.coroutines.launch
 import cl.duoc.bitacora.data.remote.mensajeDeError
 
 class CrearBitacoraViewModel(
-    application: Application
+    application: Application,
+    private val bitacoraRepository: BitacoraRepository,
+    private val usuarioRepository: UsuarioRepository
 ) : AndroidViewModel(application) {
 
-    private val database = AppDatabase.getInstance(application)
-    private val bitacoraRepository = BitacoraRepository(database.bitacoraDao())
-    private val usuarioRepository = UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
+    // Constructor que usa la app (viewModel() en la pantalla): crea los repositorios reales.
+    // El de arriba recibe los repositorios desde afuera: lo usan las pruebas con unos simulados.
+    constructor(application: Application) : this(
+        application,
+        crearBitacoraRepository(application),
+        crearUsuarioRepository(application)
+    )
+
+    companion object {
+        private fun crearBitacoraRepository(application: Application): BitacoraRepository {
+            return BitacoraRepository(AppDatabase.getInstance(application).bitacoraDao())
+        }
+
+        private fun crearUsuarioRepository(application: Application): UsuarioRepository {
+            val database = AppDatabase.getInstance(application)
+            return UsuarioRepository(database.usuarioDao(), database.asignacionDao(), database.catalogoDao())
+        }
+    }
 
     private val docenteId = Sesion.usuario?.id ?: 0
 
