@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -67,4 +68,26 @@ dependencies {
     // Retrofit para conectarse a los microservicios (EP4)
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+}
+// Kover: mide qué parte de la lógica ejecutan las pruebas unitarias.
+// Se incluyen las clases con lógica de negocio (validaciones, fechas, conversión de datos,
+// manejo de respuestas y repositorios). Las pantallas, el tema y la navegación son
+// presentación visual y no cuentan para la meta del 80 % (guía del profesor, sección 4).
+kover {
+    reports {
+        filters {
+            includes {
+                classes(
+                    "cl.duoc.bitacora.util.ValidacionesKt",
+                    "cl.duoc.bitacora.util.FechasKt",
+                    "cl.duoc.bitacora.data.remote.MapeoRemoto",
+                    "cl.duoc.bitacora.data.remote.RespuestasKt",
+                    "cl.duoc.bitacora.data.remote.ErrorServidor",
+                    "cl.duoc.bitacora.data.UsuarioRepository*",
+                    "cl.duoc.bitacora.data.BitacoraRepository*",
+                    "cl.duoc.bitacora.data.RegistroRepository*"
+                )
+            }
+        }
+    }
 }
