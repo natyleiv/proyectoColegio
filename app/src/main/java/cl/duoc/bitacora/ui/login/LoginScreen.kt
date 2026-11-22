@@ -18,9 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +45,8 @@ import cl.duoc.bitacora.model.Perfil
 import cl.duoc.bitacora.ui.componentes.CampoFormulario
 import cl.duoc.bitacora.ui.componentes.MensajeSesion
 import cl.duoc.bitacora.ui.componentes.PantallaBase
-
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 @Composable
 fun LoginScreen(
     onLoginDocente: () -> Unit,
@@ -191,7 +190,7 @@ fun LoginScreen(
                     )
                     AccesoPrueba(
                         texto = "Ingresar como estudiante",
-                        icono = Icons.Filled.MenuBook,
+                        Icons.AutoMirrored.Filled.MenuBook,
                         habilitado = !uiState.cargando,
                         onClick = {
                             viewModel.cambiarCorreo("alumno1@escuela.cl")
@@ -226,6 +225,6 @@ private fun AccesoPrueba(
         Icon(imageVector = icono, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(8.dp))
         Text(text = texto, modifier = Modifier.weight(1f))
-        Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = null)
+        Icons.AutoMirrored.Filled.KeyboardArrowRight
     }
 }
