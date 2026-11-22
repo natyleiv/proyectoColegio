@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import cl.duoc.bitacora.util.formatearFechaCalendario
 import cl.duoc.bitacora.util.mostrarNotificacion
+import kotlinx.coroutines.flow.asStateFlow
+
 
 class DetalleBitacoraViewModel(
     application: Application
@@ -75,6 +77,10 @@ class DetalleBitacoraViewModel(
     private val busqueda = MutableStateFlow("")
 
     private val fechaFiltro = MutableStateFlow("")      // "" = sin filtro de fecha
+
+    // true cuando la bitácora se eliminó: la pantalla vuelve al inicio
+    private val _eliminada = MutableStateFlow(false)
+    val eliminada: StateFlow<Boolean> = _eliminada.asStateFlow()
 
     // Une las 5 fuentes (registros, estudiantes, estado, nombre y fecha) en un solo estado
     val uiState: StateFlow<DetalleBitacoraUiState> =
@@ -164,6 +170,18 @@ class DetalleBitacoraViewModel(
                 Sesion.advertencia("Bitácora cerrada: ya no se reciben más aportes.")
             } catch (e: Exception) {
                 Sesion.error(mensajeDeError(e, "No se pudo cerrar la bitácora. Intenta nuevamente."))
+            }
+        }
+    }
+
+    fun eliminar() {
+        viewModelScope.launch {
+            try {
+                bitacoraRepository.borrar(bitacoraId, docenteId)
+                Sesion.advertencia("Bitácora eliminada.")
+                _eliminada.value = true
+            } catch (e: Exception) {
+                Sesion.error(mensajeDeError(e, "No se pudo eliminar la bitácora. Intenta nuevamente."))
             }
         }
     }

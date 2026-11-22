@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -53,6 +52,13 @@ import cl.duoc.bitacora.ui.componentes.TituloSeccion
 import cl.duoc.bitacora.ui.componentes.CampoFecha
 import cl.duoc.bitacora.util.parsearFechaCalendario
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.lazy.items
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +74,32 @@ fun DetalleBitacoraScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     MensajeSesion(snackbarHostState)
+
+    // Confirmación antes de eliminar y regreso al inicio cuando se eliminó
+    var confirmarEliminar by remember { mutableStateOf(false) }
+    val eliminada by viewModel.eliminada.collectAsStateWithLifecycle()
+    LaunchedEffect(eliminada) {
+        if (eliminada) onVolver()
+    }
+
+    if (confirmarEliminar) {
+        AlertDialog(
+            onDismissRequest = { confirmarEliminar = false },
+            title = { Text("Eliminar borrador") },
+            text = { Text("Se eliminará la bitácora y sus preguntas. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarEliminar = false
+                    viewModel.eliminar()
+                }) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarEliminar = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     // La barra de participación se llena con una animación
     val fraccionParticipacion = if (uiState.totalEstudiantes == 0) 0f
@@ -176,6 +208,18 @@ fun DetalleBitacoraScreen(
                                     Icon(Icons.Filled.Edit, contentDescription = null)
                                     Spacer(Modifier.width(8.dp))
                                     Text("Editar bitácora")
+                                }
+                                TextButton(
+                                    onClick = { confirmarEliminar = true },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Eliminar borrador", color = MaterialTheme.colorScheme.error)
                                 }
                             }
 

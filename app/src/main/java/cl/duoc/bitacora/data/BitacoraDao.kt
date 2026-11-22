@@ -28,6 +28,10 @@ interface BitacoraDao {
     @Query("DELETE FROM preguntas_orientadoras WHERE bitacoraId = :bitacoraId")
     suspend fun borrarPreguntas(bitacoraId: Int)
 
+    // Borra la bitácora de Room (sus preguntas se borran solas por el CASCADE)
+    @Query("DELETE FROM bitacoras WHERE id = :id")
+    suspend fun borrarBitacora(id: Int)
+
     // ---------- Consultas para las pantallas ----------
     // bitacoras b -> asignaciones a (docente) -> cursos c / asignaturas s
 

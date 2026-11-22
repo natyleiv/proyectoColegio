@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Star
@@ -42,6 +41,11 @@ import cl.duoc.bitacora.ui.componentes.PantallaBase
 import cl.duoc.bitacora.ui.componentes.SelectorEvidencia
 import cl.duoc.bitacora.util.anioActual
 import cl.duoc.bitacora.util.parsearFechaCalendario
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 @Composable
 fun NuevoRegistroScreen(
@@ -52,6 +56,27 @@ fun NuevoRegistroScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     MensajeSesion(snackbarHostState)
+
+    var confirmarEliminar by remember { mutableStateOf(false) }
+
+    if (confirmarEliminar) {
+        AlertDialog(
+            onDismissRequest = { confirmarEliminar = false },
+            title = { Text("Eliminar borrador") },
+            text = { Text("Se eliminará este borrador. Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmarEliminar = false
+                    viewModel.eliminar()
+                }) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmarEliminar = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     // Al guardar o enviar volvemos a la pantalla anterior
     LaunchedEffect(uiState.terminado) {
@@ -184,6 +209,21 @@ fun NuevoRegistroScreen(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
                     Text("  Enviar al docente")
+                }
+
+                // Solo al editar un borrador que ya existe
+                if (viewModel.puedeEliminar) {
+                    TextButton(
+                        onClick = { confirmarEliminar = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(
+                            Icons.Filled.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Text("  Eliminar borrador", color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         }

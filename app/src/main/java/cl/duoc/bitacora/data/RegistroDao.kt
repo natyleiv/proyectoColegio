@@ -19,6 +19,9 @@ interface RegistroDao {
     @Upsert
     suspend fun guardarRetroalimentaciones(retros: List<Retroalimentacion>)
 
+    @Query("DELETE FROM registros WHERE id = :id")
+    suspend fun borrarRegistro(id: Int)
+
     // Registro "crudo" (para editar un borrador del estudiante)
     @Query("SELECT * FROM registros WHERE id = :id AND estudianteId = :estudianteId")
     suspend fun obtenerCrudoDeEstudiante(id: Int, estudianteId: Int): List<Registro>

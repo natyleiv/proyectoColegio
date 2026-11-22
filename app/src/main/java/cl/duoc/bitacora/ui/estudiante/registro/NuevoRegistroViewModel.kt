@@ -39,6 +39,9 @@ class NuevoRegistroViewModel(
     private val bitacoraId = Sesion.bitacoraId
     private val registroId = Sesion.registroId     // 0 = registro nuevo; otro = editar borrador
 
+    // Solo se puede eliminar cuando se está editando un borrador que ya existe
+    val puedeEliminar = registroId != 0
+
     private var fechaCreacionOriginal = System.currentTimeMillis()
 
     // Mes y año de la bitácora (se cargan en cargarDatos) para validar la fecha de la clase
@@ -224,6 +227,19 @@ class NuevoRegistroViewModel(
 
         if (formularioValido) {
             guardar(enviar = true)
+        }
+    }
+
+    fun eliminar() {
+        val alumno = estudiante ?: return
+        viewModelScope.launch {
+            try {
+                registroRepository.borrar(registroId, alumno.id)
+                Sesion.advertencia("Borrador eliminado.")
+                _uiState.update { it.copy(terminado = true) }
+            } catch (e: Exception) {
+                Sesion.error(mensajeDeError(e, "No se pudo eliminar el borrador. Intenta nuevamente."))
+            }
         }
     }
 

@@ -5,9 +5,11 @@ import cl.duoc.bitacora.data.remote.MapeoRemoto
 import cl.duoc.bitacora.data.remote.PreguntaRemota
 import cl.duoc.bitacora.data.remote.RetrofitClient
 import cl.duoc.bitacora.data.remote.comprobarRespuesta
+import cl.duoc.bitacora.data.remote.comprobarSinCuerpo
 import cl.duoc.bitacora.model.Bitacora
 import cl.duoc.bitacora.model.PreguntaOrientadora
 import kotlinx.coroutines.flow.Flow
+
 
 // Las bitácoras viven en ms-bitacoras. Room guarda una copia local que las pantallas observan.
 // Escribir: primero el backend; si responde bien, se guarda en Room con el id del servidor.
@@ -78,6 +80,15 @@ class BitacoraRepository(
         }
         val cerrada = comprobarRespuesta(api.cerrarBitacora(id))
         bitacoraDao.guardarBitacoras(listOf(MapeoRemoto.aBitacora(cerrada)))
+    }
+
+    // Elimina una bitácora en BORRADOR del docente (el backend también exige que sea borrador)
+    suspend fun borrar(id: Int, docenteId: Int) {
+        if (bitacoraDao.contarEditables(id, docenteId) == 0) {
+            throw IllegalStateException("La bitácora no se puede eliminar")
+        }
+        comprobarSinCuerpo(api.borrarBitacora(id))
+        bitacoraDao.borrarBitacora(id)
     }
 
     fun obtenerPorDocente(docenteId: Int): Flow<List<BitacoraDetalle>> {

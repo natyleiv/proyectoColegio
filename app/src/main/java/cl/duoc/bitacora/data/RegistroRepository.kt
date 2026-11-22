@@ -5,9 +5,11 @@ import cl.duoc.bitacora.data.remote.MapeoRemoto
 import cl.duoc.bitacora.data.remote.RetroalimentacionRemota
 import cl.duoc.bitacora.data.remote.RetrofitClient
 import cl.duoc.bitacora.data.remote.comprobarRespuesta
+import cl.duoc.bitacora.data.remote.comprobarSinCuerpo
 import cl.duoc.bitacora.model.EstadoEnvio
 import cl.duoc.bitacora.model.Registro
 import kotlinx.coroutines.flow.Flow
+
 
 // Los registros y comentarios viven en ms-bitacoras. Room guarda una copia local que las pantallas observan.
 // Escribir: primero el backend; si responde bien, se guarda en Room con el id del servidor.
@@ -56,6 +58,16 @@ class RegistroRepository(
     suspend fun actualizar(registro: Registro) {
         val respuesta = api.actualizarRegistro(registro.id, MapeoRemoto.aRegistroRemoto(registro))
         registroDao.guardarRegistros(listOf(MapeoRemoto.aRegistro(comprobarRespuesta(respuesta))))
+    }
+
+    // Elimina un borrador del estudiante (lo enviado no se puede borrar: queda para el docente)
+    suspend fun borrar(id: Int, estudianteId: Int) {
+        val registro = registroDao.obtenerCrudoDeEstudiante(id, estudianteId).firstOrNull()
+        if (registro == null || registro.estadoEnvio != EstadoEnvio.BORRADOR) {
+            throw IllegalStateException("El registro no se puede eliminar")
+        }
+        comprobarSinCuerpo(api.borrarRegistro(id))
+        registroDao.borrarRegistro(id)
     }
 
     // Guarda la retroalimentación (el backend la crea o la actualiza).
