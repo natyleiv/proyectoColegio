@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import cl.duoc.bitacora.data.remote.mensajeDeError
 
 class RevisarRegistroViewModel(
     application: Application
@@ -66,7 +67,7 @@ class RevisarRegistroViewModel(
                     Sesion.exito("Aporte marcado como revisado.")
                     _uiState.update { it.copy(guardado = true) }
                 } catch (e: Exception) {
-                    Sesion.error("No se pudo guardar la revisión. Intenta nuevamente.")
+                    Sesion.error(mensajeDeError(e, "No se pudo guardar la revisión. Intenta nuevamente."))
                 }
             }
         }

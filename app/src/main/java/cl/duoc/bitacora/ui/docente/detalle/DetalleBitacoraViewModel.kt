@@ -34,6 +34,17 @@ class DetalleBitacoraViewModel(
     private val bitacoraId = Sesion.bitacoraId
     private val docenteId = Sesion.usuario?.id ?: 0
 
+    // Al abrir la bitácora se descargan sus aportes enviados (y comentarios) desde ms-bitacoras
+    init {
+        viewModelScope.launch {
+            try {
+                registroRepository.sincronizarDeBitacora(bitacoraId)
+            } catch (e: Exception) {
+                Sesion.error(mensajeDeError(e, "No se pudieron actualizar los aportes."))
+            }
+        }
+    }
+
     // null = todavía cargando · lista vacía = sin acceso · lista con 1 = la bitácora
     val bitacora: StateFlow<List<BitacoraDetalle>?> =
         bitacoraRepository

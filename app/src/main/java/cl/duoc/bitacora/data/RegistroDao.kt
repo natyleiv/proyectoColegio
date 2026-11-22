@@ -1,24 +1,23 @@
 package cl.duoc.bitacora.data
 
 import androidx.room3.Dao
-import androidx.room3.Insert
 import androidx.room3.Query
-import androidx.room3.Update
+import androidx.room3.Upsert
 import cl.duoc.bitacora.model.Registro
 import cl.duoc.bitacora.model.Retroalimentacion
 import kotlinx.coroutines.flow.Flow
 
+// Room guarda una copia local de los registros y comentarios de ms-bitacoras.
+// Las escrituras van primero al backend; aquí solo se guarda lo que el backend aceptó.
 @Dao
 interface RegistroDao {
 
-    @Insert
-    suspend fun insertar(registro: Registro)
+    // ---------- Guardar lo que llega del backend (inserta o actualiza, sin borrar) ----------
+    @Upsert
+    suspend fun guardarRegistros(registros: List<Registro>)
 
-    @Update
-    suspend fun actualizar(registro: Registro)
-
-    @Insert
-    suspend fun insertarRetroalimentacion(retro: Retroalimentacion)
+    @Upsert
+    suspend fun guardarRetroalimentaciones(retros: List<Retroalimentacion>)
 
     // Registro "crudo" (para editar un borrador del estudiante)
     @Query("SELECT * FROM registros WHERE id = :id AND estudianteId = :estudianteId")
@@ -110,7 +109,8 @@ interface RegistroDao {
     )
     suspend fun obtenerParaDocente(id: Int, docenteId: Int): List<RegistroDetalle>
 
-    // Cuántos registros ENVIADOS de este docente tienen ese id (0 = no puede revisarlo)
+    // Control de acceso: cuántos registros ENVIADOS de este docente tienen ese id
+    // (0 = no puede revisarlo). El backend no sabe qué docente inició sesión.
     @Query(
         """
         SELECT COUNT(*) FROM registros r
@@ -121,19 +121,7 @@ interface RegistroDao {
     )
     suspend fun contarRevisables(id: Int, docenteId: Int): Int
 
-    // Si el registro ya tenía retroalimentación, se actualiza el comentario
-    @Query(
-        """
-        UPDATE retroalimentaciones SET comentario = :comentario, fecha = :fecha, docenteId = :docenteId
-        WHERE registroId = :registroId
-        """
-    )
-    suspend fun actualizarRetroalimentacion(registroId: Int, comentario: String, fecha: Long, docenteId: Int)
-
-    @Query("SELECT COUNT(*) FROM retroalimentaciones WHERE registroId = :registroId")
-    suspend fun contarRetroalimentaciones(registroId: Int): Int
-
-    // Aportes ENVIADOS sin retroalimentación, en TODAS las bitácoras del docente (para el resumen del inicio)
+    // Aportes ENVIADOS sin retroalimentación, en TODAS las bitácoras del docente (resumen del inicio)
     @Query(
         """
         SELECT COUNT(*) FROM registros r

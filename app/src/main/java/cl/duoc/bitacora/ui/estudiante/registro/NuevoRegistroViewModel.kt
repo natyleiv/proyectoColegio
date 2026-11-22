@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import cl.duoc.bitacora.util.nombreMes
 import cl.duoc.bitacora.util.validarFechaEnMes
+import cl.duoc.bitacora.data.remote.mensajeDeError
 
 class NuevoRegistroViewModel(
     application: Application
@@ -277,7 +278,7 @@ class NuevoRegistroViewModel(
                 }
                 _uiState.update { it.copy(terminado = true) }
             } catch (e: Exception) {
-                Sesion.error("No se pudo guardar el registro. Intenta nuevamente.")
+                Sesion.error(mensajeDeError(e, "No se pudo guardar el registro. Intenta nuevamente."))
             }
         }
     }
